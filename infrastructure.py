@@ -1,39 +1,7 @@
 import random
+from collections import namedtuple
+Card = namedtuple('Card', ['value', 'suit'])
 
-class Card(object):
-    def __init__(self, suit, val):
-        self.suit = suit
-        self.value = val
-
-    def __cmp__(self, other): #allows use of "sorted" on a list of cards, which will compare them by VALUE
-        if self.value < other.value:
-            return -1
-        elif self.value == other.value:
-            return 0
-        else:
-            return 1
-    
-    #names the objects so that if you "print object", returns a string
-    def __str__(self):
-        text = ""
-        if self.value == 11:
-            text = "J"
-        elif self.value == 12:
-            text = "Q"
-        elif self.value == 13:
-            text = "K"
-        elif self.value == 14:
-            text = "A"
-        else:
-            text = str(self.value)
-
-        text += self.suit 
-
-        return text
-
-    #a prettier way to view a card
-    def show(self):
-        print self
 
 class Deck(object):
     def __init__(self):
@@ -48,7 +16,7 @@ class Deck(object):
         self.cards = []
         for s in ["D", "H", "S", "C"]:
             for v in range(2,15):
-                self.cards.append(Card(s,v))
+                self.cards.append(Card(value=v,suit=s))
 
     def shuffle(self):
         random.shuffle(self.cards)
