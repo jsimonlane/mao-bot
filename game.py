@@ -12,6 +12,9 @@ class Game(object):
     def notifyAll(action):
         for player in players:
             player.notify(action)
+            
+    def drawCard(self):
+        return self.deck.drawCard()
     
 
 #abstract class for a constraint
@@ -31,6 +34,7 @@ class CardOrder(Constraint):
         self.greater = greater
         self.prevCard
     
+    # never conditionally active
     def isActive(self, card):
         return True
         

@@ -2,7 +2,7 @@
 An AI Framework that plays Mao. Lit.
 
 ## architecture and to-dos
-* we need to make an infrastructure. The way I see it, we should do this in a primarily class based approach
+* We need to make an infrastructure. The way I see it, we should do this in a primarily class based approach
 
 ### Files & Classes:
 * infrastructure.py
@@ -10,13 +10,20 @@ An AI Framework that plays Mao. Lit.
 		* labelled "C", "H", "D" "S" for suit, & 2-14 for values.
 	* Deck 
 		* supports shuffling, resetting, and drawing
-* Game Class
-	* constraints -- specifies the rules of the game. each constraint is a rule
-	* infrastructure class? (ie cards)
-	* etc
-* Constraint Class?
+	* Player
+		* basic methods for interacting with a deck. need to modify so that it interacts with the game
+	
+* game.py
+	* Game
+		* constraints -- specifies the rules of the game. each constraint is a rule
+		* deck
+		* players
+		* order
+	* Constraint class
+		* constraints are passed into the game to keep track of rules
+		* 
 	* tbd
-* Player Class
 
-* Agent class (inherits from player?)
-	* Computation and decision making on top of player class
+* ai.py
+	* Agent class (inherits from player?)
+		* Computation and decision making on top of player class

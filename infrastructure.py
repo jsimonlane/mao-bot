@@ -33,11 +33,11 @@ class Player(object):
     def __str__(self):
         return str(self.name)
 
-    def draw(self, deck):
+    def draw(self, game):
         """
-        Draws from the deck supplied as an argument
+        Draws from the current game
         """
-        self.hand.append(deck.drawCard())
+        self.hand.append(game.drawCard())
     
     # gives a card back to a player
     def takeCard(self, card):
