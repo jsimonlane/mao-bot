@@ -1,5 +1,6 @@
 import random
 from collections import namedtuple
+
 Card = namedtuple('Card', ['value', 'suit'])
 
 
@@ -37,9 +38,13 @@ class Player(object):
         Draws from the deck supplied as an argument
         """
         self.hand.append(deck.drawCard())
+    
+    # gives a card back to a player
+    def takeCard(self, card):
+        self.hand.append(card)
 
     # it occurs to me now that this probably isn't the best way to pass cards
-    def playCard(self, card):
+    def playCard(self, card, game):
         """
         removes and returns card if successful, None if fails
         """
@@ -63,3 +68,11 @@ class Player(object):
         else:
             for card in self.hand:
                 deck.append(card)
+                
+    
+    
+    
+    
+    
+    
+#

@@ -8,15 +8,13 @@ An AI Framework that plays Mao. Lit.
 * infrastructure.py
 	* Card
 		* labelled "C", "H", "D" "S" for suit, & 2-14 for values.
-		* supports comparison based on value
-		* support pretty-printing
 	* Deck 
 		* supports shuffling, resetting, and drawing
 * Game Class
 	* constraints -- specifies the rules of the game. each constraint is a rule
 	* infrastructure class? (ie cards)
 	* etc
-* Constraint Class
+* Constraint Class?
 	* tbd
 * Player Class
 
