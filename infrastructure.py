@@ -68,6 +68,14 @@ class Player(object):
         else:
             for card in self.hand:
                 deck.append(card)
+
+class History(object):
+    def __init__(self):
+        self.moves = []
+
+    def recordMove(self, player, card, result):
+        self.moves.append((player, card, result))
+
                 
     
     
