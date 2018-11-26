@@ -1,5 +1,11 @@
 from infrastructure import *
 
+#notifications
+LEGAL = 1
+PENALTY = 2
+
+
+
 class Game(object):
     def __init__(self, players):
         self.AndConstraints = [] #this constraint must pass. ex) player order 
@@ -14,10 +20,51 @@ class Game(object):
         self.history = History() # records the history of the game for training data
         
     # allows for communication between the game and the players
-    def notifyAll(action):
+    def notifyAll(self, notification):
         for player in players:
-            player.notify(action)
+            player.notify(notification)
             
+    # gets a card from the deck. Returns None if no cards are left
+    def getCardFromDeck(self):
+        card = self.deck.drawCard()
+        # for durability, reset the deck
+        if (card == None):
+            #make a new round
+        else:
+            return card
+    
+    #         
+    # returns 1 if a player won, 0 if not
+    def playerTurn(self, player):
+        attemptedCard = player.takeAction()
+        feedback = self.isLegal(attemptedCard)
+        if feedback == LEGAL:
+            notification = (LEGAL, attemptedCard)
+            notifyAll(notification)
+            if player.won():
+                return 1
+            else:
+                return 0
+        else:
+            # return the card to the player, and penalize them with a new card
+            player.takeCard(attemptedCard)
+            penaltyCard = self.getCardFromDeck()
+            if penaltyCard:
+                player.takeCard(penaltyCard)
+            notification = (PENALTY, attemptedCard) #add self.cardBefore?
+            notifyAll(notification) 
+        
+    def playRound(self):
+        while True:
+            player = self.players[self.activePlayer]
+            result = self.playerTurn(player)
+            if result == 0:
+                break
+            else:
+                activePlayer = (1 + self.activePlayer) % len(self.players)
+        # include some change rule stuff here!
+            
+<<<<<<< HEAD
     def drawCard(self):
         draw = self.deck.drawCard()
         if draw:
@@ -25,6 +72,10 @@ class Game(object):
         else: 
             self.deck.cards = self.pile
             self.deck.shuffle()
+=======
+            
+        
+>>>>>>> GameInfraUpdates
     
     def newRound(self, prevWinner): # resets the deck and pile after the end of each round
         self.activePlayer = prevWinner
