@@ -28,7 +28,7 @@ An AI Framework that plays Mao. Lit.
 	* Agent class (inherits from player?)
 		* Computation and decision making on top of player class
 		
-*Rules
+*  Rules
 	* Base Rules
 		* Wild Cards: maximum of one card at any given time. (Value)
 		* Trump Suit: Can Be played at any time (suit)
