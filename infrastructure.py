@@ -22,9 +22,13 @@ class Deck(object):
     def shuffle(self):
         random.shuffle(self.cards)
 
+    # returns a card if the deck is not empty, None if it is empty
     def drawCard(self):
-        return self.cards.pop() #removes the last card ("the top")
-
+        if len(self.cards) == 0:
+            return None
+        else:
+            return self.cards.pop() #removes the last card ("the top")
+    
 class Player(object):
     def __init__(self, name):
         self.hand = []
@@ -32,31 +36,17 @@ class Player(object):
 
     def __str__(self):
         return str(self.name)
-
-    def draw(self, game):
-        """
-        Draws from the current game
-        """
-        self.hand.append(game.drawCard())
     
     # gives a card back to a player
     def takeCard(self, card):
         self.hand.append(card)
-
-    # it occurs to me now that this probably isn't the best way to pass cards
-    def playCard(self, card, game):
-        """
-        removes and returns card if successful, None if fails
-        """
-        try:
-            self.remove(card)
-            return card
-        except:
-            return None
     
     def showHand(self):
         for card in self.hand:
             print(card)
+        
+    def won(self):
+        return len(self.hand) == 0
             
     def clearHand(self, deck=None):
         """
@@ -68,7 +58,23 @@ class Player(object):
         else:
             for card in self.hand:
                 deck.append(card)
-                
+    
+    # removes and returns a card
+    def takeAction(self):
+        card = self.chooseCard()
+        self.hand.remove(card)
+        return card
+        
+        
+    #AI METHOD HERE
+    # notified when the state of the game changes, allows for analysis opportunity
+    def notify(self, action):
+        pass
+        
+        
+    #AI METHOD HERE
+    def chooseCard(self):
+        return self.hand[0]
     
     
     
