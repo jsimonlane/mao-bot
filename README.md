@@ -29,12 +29,12 @@ An AI Framework that plays Mao. Lit.
 		* Computation and decision making on top of player class
 		
 *Rules
-	*Base Rules
+	* Base Rules
 		* Wild Cards: maximum of one card at any given time. (Value)
 		* Trump Suit: Can Be played at any time (suit)
 		* Lower Value: Can only play cards of lower value, not higher
 		* Different Suit: Can only play cards of different value, not same
-	*Reach Rules
+	* Reach Rules
 		* Skip Rules: Skipping every x players
 		* Face Cards: cards have effects
 		* Individiual cards have effects
