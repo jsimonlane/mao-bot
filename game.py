@@ -64,7 +64,6 @@ class Game(object):
                 activePlayer = (1 + self.activePlayer) % len(self.players)
         # include some change rule stuff here!
             
-<<<<<<< HEAD
     def drawCard(self):
         draw = self.deck.drawCard()
         if draw:
@@ -72,10 +71,6 @@ class Game(object):
         else: 
             self.deck.cards = self.pile
             self.deck.shuffle()
-=======
-            
-        
->>>>>>> GameInfraUpdates
     
     def newRound(self, prevWinner): # resets the deck and pile after the end of each round
         self.activePlayer = prevWinner
