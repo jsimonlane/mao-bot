@@ -11,7 +11,7 @@ WILDVALUE = 3
 WILDSUIT = 4
 
 #notification types
-Notification = namedtuple('Notification', ['type', 'card'])
+Notification = namedtuple('Notification', ['type', 'attemptedCard', 'lastCard'])
 
 LEGAL = 1
 PENALTY = 2

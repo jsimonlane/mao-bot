@@ -78,10 +78,10 @@ class Game(object):
         if not self.autogame: print self.players[self.activePlayer].name
         if type == LEGAL:
             # self.roundHistory.recordMove(notification)
-            if not self.autogame: print "LEGAL CARD PLAYED:", notification.card, "\n"
+            if not self.autogame: print "LEGAL CARD PLAYED:", notification.attemptedCard, "\n"
         elif type == PENALTY:
             # self.roundHistory.recordMove(notification)
-            if not self.autogame: print "ILLEGAL CARD PLAYED:", notification.card, "\n"
+            if not self.autogame: print "ILLEGAL CARD PLAYED:", notification.attempedCard, "\n"
         elif type == WON:
             if not self.autogame: print "Player", self.players[self.activePlayer].name, "won!"
         
@@ -120,6 +120,7 @@ class Game(object):
         Returns WON if the player won, and 0 if not
         """
         attemptedCard = player.takeAction(self.lastCard) # the player tries to play a card
+        lastCard = self.lastCard
         feedback = self.isLegal(attemptedCard) # the card is evaluated for legality
         
         if feedback == LEGAL:
@@ -131,7 +132,7 @@ class Game(object):
             player.getFeedback(True)
             
             # notify all players of legality
-            notification = Notification(LEGAL, attemptedCard)
+            notification = Notification(LEGAL, attemptedCard, lastCard)
             self.notifyAll(notification)
             
             #handle win conditions
@@ -150,7 +151,7 @@ class Game(object):
             player.getFeedback(False)
                 
             # notify all players of the penalty
-            notification = Notification(PENALTY, attemptedCard)
+            notification = Notification(PENALTY, attemptedCard, lastCard)
             self.notifyAll(notification) 
     
     def playRound(self, prevWinner=0):
@@ -183,7 +184,7 @@ class Game(object):
             player = self.players[self.activePlayer]
             result = self.playerTurn(player)
             if result == WON:
-                notification = Notification(WON, None)
+                notification = Notification(WON, None, None)
                 self.notifyAll(notification)
                 break
             else:
@@ -206,12 +207,12 @@ class Game(object):
             winner = self.playRound(winner)
 
 # tests
-pHuman = HumanAgent("J")
+pHuman = RandomAgent("J")
 pBot = RandomAgent("Bot")
 
-g = Game([pHuman, pBot], False)
+g = Game([pHuman, pBot], True)
 
-g.playGame(1)
+g.playGame(1000)
 
 #print stats
 for player in g.players:

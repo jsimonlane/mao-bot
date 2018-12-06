@@ -52,7 +52,9 @@ class RandomAgent(Agent):
             makeModification(rule)
             
         elif ruletype == WILDVALUE:
-            newValue = random.choice([i + 2 for i in range(13)])
+            lst = [i + 2 for i in range(13)]
+            lst.append(None)
+            newValue = random.choice(lst)
             rule = Rule(WILDVALUE, newValue)
             
             makeModification(rule)
