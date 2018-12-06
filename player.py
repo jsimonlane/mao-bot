@@ -67,7 +67,8 @@ class Player(object):
         
         Return 
         """
-        return self.hand[0] #basic behavior
+        pass
+    
 
     # AI IMPLEMENTED METHOD
     def notify(self, notification, game):

@@ -211,7 +211,7 @@ pBot = RandomAgent("Bot")
 
 g = Game([pHuman, pBot], False)
 
-g.playGame(100)
+g.playGame(1)
 
 #print stats
 for player in g.players:

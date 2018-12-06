@@ -103,44 +103,41 @@ class HumanAgent(Agent):
         
     def modifyRule(self, makeModification):
         while True:
-            try:
-                print "congrats, you get to change a rule! Please be precise"
-                print "type the rule you want to change -- 1 for basicValue, 3 for WildValue, and 4 for WildSuit"
-                rule = int(input())
+            print "congrats, you get to change a rule! Please be precise"
+            print "type the rule you want to change -- 1 for basicValue, 3 for WildValue, and 4 for WildSuit"
+            rule = int(input())
+            
+            if rule == BASICVALUE:
+                print "type 0 to make lower cards have priority, and 1 to make higher cards have priority"
+                newGreater = int(input())
+                newGreater = False if newGreater == 0 else True
                 
-                if rule == BASICVALUE:
-                    print "type 0 to make lower cards have priority, and 1 to make higher cards have priority"
-                    newGreater = int(input())
-                    newGreater = False if newGreater == 0 else True
-                    
-                    rule = Rule(BASICVALUE, newGreater)
-                    makeModification(rule)
-                    
-                    return
-                    
-                elif rule == WILDVALUE:
-                    print "type in a value between 2 and 14 to make that the new wild value"
-                    newValue = int(input())
-                    
-                    rule = Rule(WILDVALUE, newValue)
-                    makeModification(rule)
-                    
-                    return
-                    
-                elif rule == WILDSUIT:
-                    while True:
-                        print "type in S, D, C, or H to change your suit"
-                        suit = raw_input().upper()
-                        if len(suit) == 1 and s in "SDCH":
-                            
-                            rule = Rule(WILDVALUE, newValue)
-                            makeModification(rule)
-                            
-                            return
-                        else:
-                            print "invalid character, try again"
-            except:
-                print "Invalid entry, let's start fresh\n"
+                rule = Rule(BASICVALUE, newGreater)
+                makeModification(rule)
+                
+                return
+                
+            elif rule == WILDVALUE:
+                print "type in a value between 2 and 14 to make that the new wild value"
+                newValue = int(input())
+                
+                rule = Rule(WILDVALUE, newValue)
+                makeModification(rule)
+                
+                return
+                
+            elif rule == WILDSUIT:
+                while True:
+                    print "type in S, D, C, or H to change your suit"
+                    suit = raw_input().upper()
+                    if len(suit) == 1 and suit in "SDCH":
+                        
+                        rule = Rule(WILDVALUE, suit)
+                        makeModification(rule)
+                        
+                        return
+                    else:
+                        print "invalid character, try again"
         
         
     def notify(self, notification, game):

@@ -55,7 +55,7 @@ class WildValueEffect(Constraint):
     """
     def __init__(self, game):
         self.game = game
-        self.wildValue = 7 #basic game rule
+        self.wildValue = None #basic game rule
     
     def isActive(self, attemptedCard):
         return self.wildValue != None
