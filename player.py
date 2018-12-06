@@ -1,20 +1,13 @@
 from infrastructure import *
 import random
-import sys
 
 class Player(object):
-    def __init__(self, name, isHuman=False):
+    def __init__(self, name):
         self.hand = []
         self.name = name
-        self.isHuman = isHuman
         
         self.wins = 0
-        
-        self.roundLegals = 0
-        self.roundIllegals = 0
-        
-        self.validPercentByRound = []
-
+    
     def __str__(self):
         return str(self.name)
     
@@ -23,11 +16,7 @@ class Player(object):
         if card != None:
             self.hand.append(card)
         else:
-            print "takeCard: no card drawn"
-    
-    def showHand(self):
-        for index, card in enumerate(self.hand):
-            print "Index:", index, " -- ", card
+            print "takeCard: no card drawn. This seems like trouble -- investigate"
         
     def won(self):
         if len(self.hand) == 0:
@@ -35,17 +24,6 @@ class Player(object):
             return True
         else:
             return False
-            
-    def newRound(self):
-        self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
-        self.roundLegals = 0
-        self.roundIllegals = 0
-    
-    def wellPlayed(self):
-        self.roundLegals += 1
-    
-    def badlyPlayed(self):
-        self.roundIllegals += 1
             
     def clearHand(self, deck=None):
         """
@@ -73,127 +51,35 @@ class Player(object):
         card = self.chooseCard(lastCard)
         self.hand.remove(card)
         return card
-        
-    def humanChoose(self, lastCard):
-        while True:
-            # show your hand
-            print "the LAST CARD that was played was:", lastCard
-            print "your hand is: \n"
-            self.showHand()
-            print "\ntype the index of the card you want to play: "
-            
-            instr = raw_input()
-            if instr == "q":
-                print "quitting"
-                sys.exit()
-            try:
-                index = int(instr)
-                return self.hand[index]
-            except:
-                print "\n\n**INVALID SELECTION** Try again: \n\n"
-
-    def modifyRule(self, game):
-        # choose a random rule to modify
-        # modify it
-        if not self.isHuman:
-            rule = random.choice([BASICVALUE, WILDVALUE, WILDSUIT])
-            #
-            if rule == BASICVALUE:
-                newGreater = random.choice([True, False])
-                game.basicValueConstraint.modify(newGreater)
-                self.updateBeliefOnModification(rule, newGreater)
-                
-            elif rule == WILDVALUE:
-                newValue = random.choice([i + 2 for i in range(13)])
-                game.wildValueEffect.modify(newValue)
-                self.updateBeliefOnModification(rule, newValue)
-            
-            elif rule == WILDSUIT:
-                newSuit = random.choice(["D", "H", "S", "C"])
-                game.wildSuitEffect.modify(newSuit)
-                self.updateBeliefOnModification(rule, newSuit)
-                
-        else: 
-            while True:
-                try:
-                    print "congrats, you get to change a rule! Please be precise"
-                    print "type the rule you want to change -- 1 for basicValue, 3 for WildValue, and 4 for WildSuit"
-                    rule = int(input())
-                    
-                    if rule == BASICVALUE:
-                        print "type 0 to make lower cards have priority, and 1 to make higher cards have priority"
-                        newGreater = int(input())
-                        newGreater = False if newGreater == 0 else True
-                        game.basicValueConstraint.modify(newGreater)
-                        return
-                        
-                    elif rule == WILDVALUE:
-                        print "type in a value between 2 and 14 to make that the new wild value"
-                        newValue = int(input())
-                        game.wildValueEffect.modify(newValue)
-                        return
-                        
-                    elif rule == WILDSUIT:
-                        while True:
-                            print "type in S, D, C, or H to change your suit"
-                            suit = raw_input().upper()
-                            if len(suit) == 1 and s in "SDCH":
-                                game.wildSuitEffect.modify(suit)
-                                return
-                            else:
-                                print "invalid character, try again"
-                except:
-                    print "Invalid entry, let's start fresh\n"
-            
     
-    #AI METHOD
-    def updateBeliefOnModification(self, rule, value):
+    # Agent Method
+    def modifyRule(self, game):
         """
-        updates an AI agent's understanding of the world based on a new rule it
-        just created.
+        The Game calls this method when a player wins, and is allowed to change a rule
         """
         pass
         
     #AI METHOD HERE. Returns a card. DOES NOT REMOVE IT!
     def chooseCard(self, lastCard):
-        if self.isHuman:
-            return self.humanChoose(lastCard)
-        else:
-            return self.hand[0] # change this!
+        """
+        AI implemented method for determining which card to return
+        Default behavior: returns first card
+        
+        Return 
+        """
+        return self.hand[0] #basic behavior
 
     # AI IMPLEMENTED METHOD
-    # notified when the state of the game changes, allows for analysis opportunity (ie updating beliefs)
     def notify(self, notification, game):
-        # print player.name, "was notified"
-        if notification.type == 3: #corresponds to "won"
-            self.newRound()
-        pass
-
-
-class Agent(Player):
-    def __init__(self, name, isHuman):
-        super(Player, self).__init__(name, isHuman)    
-    
-    def updateBeliefOnModification(self, rule, value):
-        pass
-    
-    def chooseCard(self, lastCard):
-        pass
-    
-    def notify(self, notification, game):
-        pass
-
-class HumanAgent(Agent):
-    def __init__(self, name):
-        super(Agent, self).__init__(name)
-    
-    def updateBeliefOnModification(self, rule, value):
+        """
+        notified when the state of the game changes, allows for analysis opportunity (ie updating beliefs)
+        """
         pass
         
-    def chooseCard(self, lastCard):
-        pass
-        
-    def notify(self, notification, game):
+    def getFeedback(self, isLegal):
+        """
+        the player gets feedback from the game on whether their card was legal or not
+        """
         pass
     
 

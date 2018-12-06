@@ -2,11 +2,11 @@ from infrastructure import *
 import constraints
 
 import copy
-from player import *
+from agents import *
 
 
 class Game(object):
-    def __init__(self, players, autogame = False):
+    def __init__(self, players, autogame = True):
         
         # constraints
         self.basicValueConstraint = constraints.BasicValueConstraint(True, self)
@@ -30,6 +30,19 @@ class Game(object):
         self.round = 0 # record which round we are on
         self.gameHistory = GameHistory() # records the history of the game for training data
         self.roundHistory = RoundHistory()
+        
+    def makeModification(self, ruleTuple):
+        rule = ruleTuple.rule
+        setting = ruleTuple.setting
+        
+        if rule == BASICVALUE:
+            self.basicValueConstraint.modify(setting)
+        elif rule == BASICSUIT:
+            pass
+        elif rule == WILDSUIT:
+            self.wildSuitEffect.modify(setting)
+        elif rule == WILDVALUE:
+            self.wildValueEffect.modify(setting)
         
     def isLegal(self, attemptedCard):
         """ 
@@ -115,7 +128,7 @@ class Game(object):
             self.lastCard = attemptedCard
             
             #tell player of legality
-            player.wellPlayed()
+            player.getFeedback(True)
             
             # notify all players of legality
             notification = Notification(LEGAL, attemptedCard)
@@ -134,7 +147,7 @@ class Game(object):
                 player.takeCard(penaltyCard)
                 
             #tell player of illegality
-            player.badlyPlayed()
+            player.getFeedback(False)
                 
             # notify all players of the penalty
             notification = Notification(PENALTY, attemptedCard)
@@ -182,7 +195,7 @@ class Game(object):
         
         # modify the rules every fifth round
         if (self.round % self.changeRuleRate == 0):
-            self.players[self.activePlayer].modifyRule(self)
+            self.players[self.activePlayer].modifyRule(self.makeModification) #pass the method as an argument
         
         return self.activePlayer
         
@@ -191,21 +204,20 @@ class Game(object):
         winner = 0
         for i in range(numRounds):
             winner = self.playRound(winner)
-            
 
 # tests
-pHuman = Player("J")
-pBot = Player("Bot")
+pHuman = HumanAgent("J")
+pBot = RandomAgent("Bot")
 
-g = Game([pHuman, pBot], True)
+g = Game([pHuman, pBot], False)
 
-g.playGame(1000)
+g.playGame(100)
 
 #print stats
 for player in g.players:
     print player.name
     print player.wins
-    print player.validPercentByRound[0]
+    if type(player) == RandomAgent: print player.validPercentByRound[0]
 
 
 
