@@ -4,6 +4,13 @@ from collections import namedtuple
 
 Card = namedtuple('Card', ['value', 'suit'])
 
+# rule settings
+Rule = namedtuple('Rule', ['rule', 'setting'])
+BASICVALUE = 1
+BASICSUIT = 2 # I don't think there's much we can do with this as of now
+WILDVALUE = 3
+WILDSUIT = 4
+
 
 class Deck(object):
     def __init__(self):
@@ -82,7 +89,7 @@ class Player(object):
         
     # AGENT IMPLEMENTED METHOD
     # notified when the state of the game changes, allows for analysis opportunity (ie updating beliefs)
-    def notify(self, action):
+    def notify(self, notification, game):
         # print player.name, "was notified"
         pass
         
@@ -112,13 +119,64 @@ class Player(object):
             return self.humanChoose(lastCard)
         else:
             return self.hand[0] # change this!
-                
-class History(object):
-    def __init__(self):
-        self.moves = []
 
-    def recordMove(self, player, card, result):
-        self.moves.append((player, card, result))
+    def modifyRule(self, game, isHuman=False):
+        # choose a random rule to modify
+        # modify it
+        if not isHuman:
+            rule = random.choice[BASICVALUE, WILDVALUE, WILDSUIT]
+            #
+            if rule == BASICVALUE:
+                newGreater = random.choice[True, False]
+                game.basicValueConstraint.modify(newGreater)
+                self.updateBeliefOnModification(rule, newGreater)
+                
+            elif rule == WILDVALUE:
+                newValue = random.choice [i + 2 for i in range(13)]
+                game.wildValueEffect.modify(newValue)
+                self.updateBeliefOnModification(rule, newValue)
+            
+            elif rule == WILDSUIT:
+                newSuit = random.choice["D", "H", "S", "C"]
+                game.wildSuitEffect.modify(newSuit)
+                self.updateBeliefOnModification(rule, newSuit)
+                
+        else: 
+            print "congrats, you get to change a rule!"
+            print "note that this rule changing system is fragile -- please be precise"
+            print "type the rule you want to change -- 1 for basicValue, 3 for WildValue, and 4 for WildSuit"
+            rule = int(input())
+            
+            if rule == BASICVALUE:
+                print "type 0 to make lower cards have priority, and 1 to make higher cards have priority"
+                newGreater = int(input())
+                newGreater = False if newGreater == 0 else True
+                return
+                
+            elif rule == WILDVALUE:
+                print "type in a value between 2 and 14 to make that the new wild value"
+                newValue = int(input())
+                game.wildValueEffect.modify(newValue)
+                return
+                
+            elif rule == WILDSUIT:
+                while True:
+                    print "type in S, D, C, or H to change your suit"
+                    suit = raw_input().upper()
+                    if len(suit) == 1 and s in "SDCH":
+                        game.wildSuitEffect.modify(suit)
+                        return
+                    else:
+                        print "invalid character, try again"
+            
+    
+    #AI METHOD
+    def updateBeliefOnModification(self, rule, value):
+        """
+        updates an AI agent's understanding of the world based on a new rule it
+        just created.
+        """
+        pass
 
 
 

@@ -9,14 +9,32 @@ LEGAL = 1
 PENALTY = 2
 WON = 3
 
+# keeps track of a bunch of round histories
+class GameHistory(object):
+    def __init__(self):
+        self.rounds = []
+
+    def addRound(self, roundHistory):
+        self.rounds.append(roundHistory)
+
+# keeps track of the history of a round. further indices are more recent games
+class RoundHistory(object):
+    def __init__(self):
+        self.moves = []
+
+    def recordMove(self, notification):
+        self.moves.append(copy.deepcopy(notification)) # watch out. I have a feeling this will slow down things considerably
+
 
 
 class Game(object):
     def __init__(self, players):
         
-        # constraint stuff
-        self.baseConstraints = [BasicValueConstraint(True, self), BasicSuitConstraint(self)] # list containing basic constraints
-        self.wildEffects = [WildValueEffect(self), TrumpSuitEffect(self)] # list containing the two wild cards
+        # constraints
+        self.basicValueConstraint = BasicValueConstraint(True, self)
+        self.basicSuitConstraint = BasicSuitConstraint(self)
+        self.wildValueEffect = WildValueEffect(self)
+        self.wildSuitEffect = WildSuitEffect(self)
         
         # player stuff
         self.players = players
@@ -29,7 +47,8 @@ class Game(object):
         self.lastCard = None
         
         self.round = 0 # record which round we are on
-        self.history = History() # records the history of the game for training data
+        self.gameHistory = GameHistory() # records the history of the game for training data
+        self.roundHistory = RoundHistory()
         
     def isLegal(self, attemptedCard):
         """ 
@@ -37,35 +56,43 @@ class Game(object):
         Returns True or False
         """
         #try effects. needs only ONE to return True
-        for effect in self.wildEffects:
+        wildEffects = [self.wildValueEffect, self.wildSuitEffect]
+        
+        for effect in wildEffects:
             if (effect.isActive(attemptedCard)):
                 if (effect.isLegal(attemptedCard)):
                     return True
         
         # try the basics (ie, ordering and other). These are always active
         # need only ONE to pass as true
-        for constraint in self.baseConstraints:
+        basicConstraints = [self.basicValueConstraint, self.basicSuitConstraint]
+        
+        for constraint in basicConstraints:
             if (constraint.isLegal(attemptedCard)):
                 return True
         return False # if all the constraints pass, return true
         
-    # allows for communication between the game and the players
+    
     def notifyAll(self, notification):
+        """
+        Notifies all players of a change in the gamestate.
+        The "game history" is also notified
+        """
         # print stuff for human players for human players
         type = notification.type
         
         print self.players[self.activePlayer].name
         if type == LEGAL:
+            # self.roundHistory.recordMove(notification)
             print "LEGAL CARD PLAYED:", notification.card, "\n"
         elif type == PENALTY:
+            # self.roundHistory.recordMove(notification)
             print "ILLEGAL CARD PLAYED:", notification.card, "\n"
         elif type == WON:
             print "Player", self.players[self.activePlayer].name, "won!"
-
-        
         
         for player in self.players:
-            player.notify(notification)
+            player.notify(notification, self)
             
     # gets a card from the deck. Resets the pile if necessary.
     # returns None if all the cards are in players hands (god help us)
@@ -78,11 +105,12 @@ class Game(object):
                 #sheesh. literally all the cards have been played
                 return None
             else:
+                # NOTE: THESE ARE UNTESTED!!! WATCH OUT FOR THIS SECTION!
                 # make a new deck using the pile
                 origLen = len(self.pile) # for assert
                 self.deck.cards = copy.copy(self.pile) #preserves references I think
                 self.pile = []
-                assert (origLen == len(self.deck.cards)) #copying trips me out
+                assert( origLen == len(self.deck.cards) ) #copying trips me out
                 self.deck.shuffle()
                 return self.getCardFromDeck() #recurse, try to get another card
         else:
@@ -124,18 +152,19 @@ class Game(object):
             # notify all players of the penalty
             notification = Notification(PENALTY, attemptedCard)
             self.notifyAll(notification) 
-        
+    
     def playRound(self, prevWinner=0):
         """
         Plays a single round of the Mao card game. 
         Initilalized with whoever the previous winner was
         
-        Returns Void
+        Returns the player number of the winner of the round.
         """
         def initNewRound(prevWinner): # resets the deck and pile after the end of each round
             self.activePlayer = prevWinner
-            self.deck = Deck() #maybe not the best, but we can optimize later
+            self.deck = Deck() #maybe not the best, but we can optimize later. ideally we fetch cards from every player
             self.pile = []
+            self.roundHistory = RoundHistory() # declare a new round
             
             # initialize the first card that is placed
             initialCard = self.getCardFromDeck()
@@ -160,8 +189,21 @@ class Game(object):
             else:
                 self.activePlayer = (1 + self.activePlayer) % len(self.players)
                 
+        # closing the round off
+        self.gameHistory.append(self.roundHistory)
+        self.round += 1
         
-        # include some change rule stuff here!
+        # modify the rules every fifth round
+        if (self.round % 5 == 0):
+            self.players[self.activePlayer].modifyRule(self)
+        
+        return self.activePlayer
+        
+    
+    def playGame(self, numRounds=10):
+        winner = 0
+        for i in range(numRounds):
+            winner = self.playRound(winner)
             
     
 
@@ -239,25 +281,25 @@ class WildValueEffect(Constraint):
         """
         self.wildValue = value
         
-class TrumpSuitEffect(Constraint):
+class WildSuitEffect(Constraint):
     """
-    Allows for a "Trump Suit Suit"
+    Allows for a "Wild Suit" -- this suit trumps all other suits
     """
     def __init__(self, game):
         self.game = game
-        self.trumpSuit = None
+        self.wildSuit = None
     
     def isActive(self, attemptedCard):
-        return self.trumpSuit != None
+        return self.wildSuit != None
     
     def isLegal(self, attemptedCard):
-        return attemptedCard.suit == self.trumpSuit
+        return attemptedCard.suit == self.wildSuit
     
     def modify(self, suit):
         """
         Give it a suit or None to change the value of this constraint
         """
-        self.trumpSuit = suit
+        self.wildSuit = suit
         
 
 # tests
