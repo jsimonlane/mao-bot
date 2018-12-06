@@ -15,8 +15,8 @@ class Game(object):
     def __init__(self, players):
         
         # constraint stuff
-        self.AndConstraints = [] #this constraint must pass. ex) player order 
-        self.OrConstraints = [] # only one of these constraints needs to pass. ex) higher value, or same suit can be played
+        self.baseConstraints = [BasicValueConstraint(True, self), BasicSuitConstraint(self)] # list containing basic constraints
+        self.wildEffects = [WildValueEffect(self), TrumpSuitEffect(self)] # list containing the two wild cards
         
         # player stuff
         self.players = players
@@ -31,12 +31,23 @@ class Game(object):
         self.round = 0 # record which round we are on
         self.history = History() # records the history of the game for training data
         
-    def isLegal(self, card):
+    def isLegal(self, attemptedCard):
         """ 
         Evaluates the card against the current constraints to see whether it is viable or not
         Returns True or False
         """
-        return True
+        #try effects. needs only ONE to return True
+        for effect in self.wildEffects:
+            if (effect.isActive(attemptedCard)):
+                if (effect.isLegal(attemptedCard)):
+                    return True
+        
+        # try the basics (ie, ordering and other). These are always active
+        # need only ONE to pass as true
+        for constraint in self.baseConstraints:
+            if (constraint.isLegal(attemptedCard)):
+                return True
+        return False # if all the constraints pass, return true
         
     # allows for communication between the game and the players
     def notifyAll(self, notification):
@@ -90,7 +101,6 @@ class Game(object):
         feedback = self.isLegal(attemptedCard) # the card is evaluated for legality
         
         if feedback == LEGAL:
-            
             # game state bookkeeping -- last card, and the pile
             self.pile.append(attemptedCard)
             self.lastCard = attemptedCard
@@ -168,30 +178,86 @@ class Constraint(object):
     def isLegal(self, card):
         pass
 
-# tells you if higher or lower cards can be played, init with bool greater
-# in general, if card is equal or (greater/less), then it is legal
-class CardOrder(Constraint):
+
+class BasicValueConstraint(Constraint):
+    """
+    Tells you if higher or lower cards can be played, init with bool greater
+      in general, if card is equal or (greater/less), then it is legal
+    """
     def __init__(self, greater, game): #greater is a boolean to say if greater values are allowed, or lower values are
         self.greater = greater
-        self.game = game #way to refer back to the parent game
-    
-    def getLastCard(self):
-        return self.game.lastCard
-    
+        self.game = game # way to refer back to the parent game
+
     # never conditionally active
-    def isActive(self, card):
+    def isActive(self, attemptedCard):
         return True
-        
-    # updates the last card that was played
-    def setPrevCard(self, card):
-        self.prevCard = card
+    
+    def isLegal(self, attemptedCard):
+        if self.greater:
+            return attemptedCard.value >= self.game.lastCard.value
+        else:
+            return attemptedCard.value <= self.game.lastCard.value
+    
+    def modify(self, greaterBool):
+        """
+        if greaterBool is true, greater cards now win.
+        if greaterBool is false, lower cards now win.
+        """
+        self.greater = greaterBool
+            
+class BasicSuitConstraint(Constraint):
+    """
+    The basic constraint that says cards may be of the same suit 
+      as the lastCard (card on top of the deck)
+    """
+    def __init__(self, game):
+        self.game = game
+    
+    def isActive(self, attemptedCard):
+        return True
     
     def isLegal(self, card):
-        if self.greater:
-            return card.value >= prevCard.value
-        else:
-            return card.value <= prevCard.value
+        return card.suit == self.game.lastCard.suit
         
+class WildValueEffect(Constraint):
+    """
+    Allows for a "wild value"
+    """
+    def __init__(self, game):
+        self.game = game
+        self.wildValue = 7 #basic game rule
+    
+    def isActive(self, attemptedCard):
+        return self.wildValue != None
+    
+    def isLegal(self, attemptedCard):
+        return attemptedCard.value == self.wildValue
+    
+    def modify(self, value):
+        """
+        Give it an int between [2,15] or None to change the rank of this constraint
+        """
+        self.wildValue = value
+        
+class TrumpSuitEffect(Constraint):
+    """
+    Allows for a "Trump Suit Suit"
+    """
+    def __init__(self, game):
+        self.game = game
+        self.trumpSuit = None
+    
+    def isActive(self, attemptedCard):
+        return self.trumpSuit != None
+    
+    def isLegal(self, attemptedCard):
+        return attemptedCard.suit == self.trumpSuit
+    
+    def modify(self, suit):
+        """
+        Give it a suit or None to change the value of this constraint
+        """
+        self.trumpSuit = suit
         
 
 # tests
@@ -201,6 +267,9 @@ pBot = Player("Bot")
 g = Game([pHuman, pBot])
 
 g.playRound()
+
+
+
 
 
 #
