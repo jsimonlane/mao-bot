@@ -1,44 +1,23 @@
 from infrastructure import *
-from collections import namedtuple
+import constraints
+
 import copy
-
-Notification = namedtuple('Notification', ['type', 'card'])
-
-#notification types
-LEGAL = 1
-PENALTY = 2
-WON = 3
-
-# keeps track of a bunch of round histories
-class GameHistory(object):
-    def __init__(self):
-        self.rounds = []
-
-    def addRound(self, roundHistory):
-        self.rounds.append(roundHistory)
-
-# keeps track of the history of a round. further indices are more recent games
-class RoundHistory(object):
-    def __init__(self):
-        self.moves = []
-
-    def recordMove(self, notification):
-        self.moves.append(copy.deepcopy(notification)) # watch out. I have a feeling this will slow down things considerably
-
+from player import *
 
 
 class Game(object):
-    def __init__(self, players):
+    def __init__(self, players, autogame = False):
         
         # constraints
-        self.basicValueConstraint = BasicValueConstraint(True, self)
-        self.basicSuitConstraint = BasicSuitConstraint(self)
-        self.wildValueEffect = WildValueEffect(self)
-        self.wildSuitEffect = WildSuitEffect(self)
+        self.basicValueConstraint = constraints.BasicValueConstraint(True, self)
+        self.basicSuitConstraint = constraints.BasicSuitConstraint(self)
+        self.wildValueEffect = constraints.WildValueEffect(self)
+        self.wildSuitEffect = constraints.WildSuitEffect(self)
         
         # player stuff
         self.players = players
         self.activePlayer = 0 # the player after the dealer goes first. keeps track of which player is up
+        self.autogame = autogame
         
         #deck stuff
         self.startingHandSize = 5
@@ -47,6 +26,7 @@ class Game(object):
         self.pile = [] # a list of discarded cards. DIFFERENT FROM DECK OBJECT. 
         self.lastCard = None
         
+        #round stuff
         self.round = 0 # record which round we are on
         self.gameHistory = GameHistory() # records the history of the game for training data
         self.roundHistory = RoundHistory()
@@ -82,15 +62,15 @@ class Game(object):
         # print stuff for human players for human players
         type = notification.type
         
-        print self.players[self.activePlayer].name
+        if not self.autogame: print self.players[self.activePlayer].name
         if type == LEGAL:
             # self.roundHistory.recordMove(notification)
-            print "LEGAL CARD PLAYED:", notification.card, "\n"
+            if not self.autogame: print "LEGAL CARD PLAYED:", notification.card, "\n"
         elif type == PENALTY:
             # self.roundHistory.recordMove(notification)
-            print "ILLEGAL CARD PLAYED:", notification.card, "\n"
+            if not self.autogame: print "ILLEGAL CARD PLAYED:", notification.card, "\n"
         elif type == WON:
-            print "Player", self.players[self.activePlayer].name, "won!"
+            if not self.autogame: print "Player", self.players[self.activePlayer].name, "won!"
         
         for player in self.players:
             player.notify(notification, self)
@@ -134,6 +114,9 @@ class Game(object):
             self.pile.append(attemptedCard)
             self.lastCard = attemptedCard
             
+            #tell player of legality
+            player.wellPlayed()
+            
             # notify all players of legality
             notification = Notification(LEGAL, attemptedCard)
             self.notifyAll(notification)
@@ -149,6 +132,9 @@ class Game(object):
             penaltyCard = self.getCardFromDeck()
             if penaltyCard:
                 player.takeCard(penaltyCard)
+                
+            #tell player of illegality
+            player.badlyPlayed()
                 
             # notify all players of the penalty
             notification = Notification(PENALTY, attemptedCard)
@@ -180,7 +166,7 @@ class Game(object):
         initNewRound(prevWinner)
         
         while True:
-            print "It is the turn of: ", self.players[self.activePlayer].name
+            # print "It is the turn of: ", self.players[self.activePlayer].name
             player = self.players[self.activePlayer]
             result = self.playerTurn(player)
             if result == WON:
@@ -206,110 +192,20 @@ class Game(object):
         for i in range(numRounds):
             winner = self.playRound(winner)
             
-    
-
-            
-
-
-#abstract class for a constraint
-class Constraint(object):
-    # returns a bool. True if the constraint should be activated
-    # ex) maybe every time two cards of the same type are placed, the next player is skipped
-    def isActive(self, card):
-        pass
-    
-    def isLegal(self, card):
-        pass
-
-
-class BasicValueConstraint(Constraint):
-    """
-    Tells you if higher or lower cards can be played, init with bool greater
-      in general, if card is equal or (greater/less), then it is legal
-    """
-    def __init__(self, greater, game): #greater is a boolean to say if greater values are allowed, or lower values are
-        self.greater = greater
-        self.game = game # way to refer back to the parent game
-
-    # never conditionally active
-    def isActive(self, attemptedCard):
-        return True
-    
-    def isLegal(self, attemptedCard):
-        if self.greater:
-            return attemptedCard.value >= self.game.lastCard.value
-        else:
-            return attemptedCard.value <= self.game.lastCard.value
-    
-    def modify(self, greaterBool):
-        """
-        if greaterBool is true, greater cards now win.
-        if greaterBool is false, lower cards now win.
-        """
-        self.greater = greaterBool
-            
-class BasicSuitConstraint(Constraint):
-    """
-    The basic constraint that says cards may be of the same suit 
-      as the lastCard (card on top of the deck)
-    """
-    def __init__(self, game):
-        self.game = game
-    
-    def isActive(self, attemptedCard):
-        return True
-    
-    def isLegal(self, card):
-        return card.suit == self.game.lastCard.suit
-        
-class WildValueEffect(Constraint):
-    """
-    Allows for a "wild value"
-    """
-    def __init__(self, game):
-        self.game = game
-        self.wildValue = 7 #basic game rule
-    
-    def isActive(self, attemptedCard):
-        return self.wildValue != None
-    
-    def isLegal(self, attemptedCard):
-        return attemptedCard.value == self.wildValue
-    
-    def modify(self, value):
-        """
-        Give it an int between [2,15] or None to change the rank of this constraint
-        """
-        self.wildValue = value
-        
-class WildSuitEffect(Constraint):
-    """
-    Allows for a "Wild Suit" -- this suit trumps all other suits
-    """
-    def __init__(self, game):
-        self.game = game
-        self.wildSuit = None
-    
-    def isActive(self, attemptedCard):
-        return self.wildSuit != None
-    
-    def isLegal(self, attemptedCard):
-        return attemptedCard.suit == self.wildSuit
-    
-    def modify(self, suit):
-        """
-        Give it a suit or None to change the value of this constraint
-        """
-        self.wildSuit = suit
-        
 
 # tests
-pHuman = Player("J", True)
+pHuman = Player("J")
 pBot = Player("Bot")
 
-g = Game([pHuman, pBot])
+g = Game([pHuman, pBot], True)
 
-g.playGame()
+g.playGame(1000)
+
+#print stats
+for player in g.players:
+    print player.name
+    print player.wins
+    print player.validPercentByRound[0]
 
 
 
