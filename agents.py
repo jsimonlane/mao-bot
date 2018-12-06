@@ -6,18 +6,19 @@ class Agent(Player):
     def __init__(self, name):
         super(Player, self).__init__(name)    
     
-    def updateBeliefOnModification(self, rule):
-        pass #DO NOT CHANGE
-    
+    # return the card from your hand you want to play
     def chooseCard(self, lastCard):
         pass #DO NOT CHANGE
     
+    # notified of an event in the game (a penalty, a success, or a win)
     def notify(self, notification, game):
         pass #DO NOT CHANGE
-        
+    
+    # change a rule via the makeModification function, which takes a "rule" tuple as its only argument
     def modifyRule(self, makeModification):
         pass #DO NOT CHANGE
 
+    # this is how you know if the move you just made is legal or not
     def getFeedback(self, isLegal):
         pass # DO NOT CHANGE
 
@@ -49,21 +50,18 @@ class RandomAgent(Agent):
             rule = Rule(BASICVALUE, newGreater)
             
             makeModification(rule)
-            self.updateBeliefOnModification(rule)
             
         elif ruletype == WILDVALUE:
             newValue = random.choice([i + 2 for i in range(13)])
             rule = Rule(WILDVALUE, newValue)
             
             makeModification(rule)
-            self.updateBeliefOnModification(rule)
         
         elif ruletype == WILDSUIT:
             newSuit = random.choice(["D", "H", "S", "C"])
             rule = Rule(WILDSUIT, newSuit)
             
             makeModification(rule)
-            self.updateBeliefOnModification(rule)
     
     def chooseCard(self, lastCard):
         return self.hand[0]
@@ -81,9 +79,6 @@ class HumanAgent(Agent):
     def __init__(self, name):
         super(Agent, self).__init__(name)
     
-    def updateBeliefOnModification(self, rule):
-        pass
-        
     def chooseCard(self, lastCard):
         def showHand():
             for index, card in enumerate(self.hand):
