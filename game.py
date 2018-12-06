@@ -42,6 +42,7 @@ class Game(object):
         
         #deck stuff
         self.startingHandSize = 5
+        self.changeRuleRate = 1
         self.deck = Deck() #pre-shuffled deck
         self.pile = [] # a list of discarded cards. DIFFERENT FROM DECK OBJECT. 
         self.lastCard = None
@@ -190,11 +191,11 @@ class Game(object):
                 self.activePlayer = (1 + self.activePlayer) % len(self.players)
                 
         # closing the round off
-        self.gameHistory.append(self.roundHistory)
+        self.gameHistory.addRound(self.roundHistory)
         self.round += 1
         
         # modify the rules every fifth round
-        if (self.round % 5 == 0):
+        if (self.round % self.changeRuleRate == 0):
             self.players[self.activePlayer].modifyRule(self)
         
         return self.activePlayer
@@ -308,7 +309,7 @@ pBot = Player("Bot")
 
 g = Game([pHuman, pBot])
 
-g.playRound()
+g.playGame()
 
 
 

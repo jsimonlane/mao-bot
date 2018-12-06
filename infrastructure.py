@@ -109,8 +109,8 @@ class Player(object):
                 index = int(instr)
                 return self.hand[index]
             except:
-                continue
-            print "\n\nINVALID SELECTION. Try again: \n\n"
+                print "\n\n**INVALID SELECTION** Try again: \n\n"
+            
         
         
     #AI METHOD HERE. Returns a card. DOES NOT REMOVE IT!
@@ -120,54 +120,58 @@ class Player(object):
         else:
             return self.hand[0] # change this!
 
-    def modifyRule(self, game, isHuman=False):
+    def modifyRule(self, game):
         # choose a random rule to modify
         # modify it
-        if not isHuman:
-            rule = random.choice[BASICVALUE, WILDVALUE, WILDSUIT]
+        if not self.isHuman:
+            rule = random.choice([BASICVALUE, WILDVALUE, WILDSUIT])
             #
             if rule == BASICVALUE:
-                newGreater = random.choice[True, False]
+                newGreater = random.choice([True, False])
                 game.basicValueConstraint.modify(newGreater)
                 self.updateBeliefOnModification(rule, newGreater)
                 
             elif rule == WILDVALUE:
-                newValue = random.choice [i + 2 for i in range(13)]
+                newValue = random.choice([i + 2 for i in range(13)])
                 game.wildValueEffect.modify(newValue)
                 self.updateBeliefOnModification(rule, newValue)
             
             elif rule == WILDSUIT:
-                newSuit = random.choice["D", "H", "S", "C"]
+                newSuit = random.choice(["D", "H", "S", "C"])
                 game.wildSuitEffect.modify(newSuit)
                 self.updateBeliefOnModification(rule, newSuit)
                 
         else: 
-            print "congrats, you get to change a rule!"
-            print "note that this rule changing system is fragile -- please be precise"
-            print "type the rule you want to change -- 1 for basicValue, 3 for WildValue, and 4 for WildSuit"
-            rule = int(input())
-            
-            if rule == BASICVALUE:
-                print "type 0 to make lower cards have priority, and 1 to make higher cards have priority"
-                newGreater = int(input())
-                newGreater = False if newGreater == 0 else True
-                return
-                
-            elif rule == WILDVALUE:
-                print "type in a value between 2 and 14 to make that the new wild value"
-                newValue = int(input())
-                game.wildValueEffect.modify(newValue)
-                return
-                
-            elif rule == WILDSUIT:
-                while True:
-                    print "type in S, D, C, or H to change your suit"
-                    suit = raw_input().upper()
-                    if len(suit) == 1 and s in "SDCH":
-                        game.wildSuitEffect.modify(suit)
+            while True:
+                try:
+                    print "congrats, you get to change a rule! Please be precise"
+                    print "type the rule you want to change -- 1 for basicValue, 3 for WildValue, and 4 for WildSuit"
+                    rule = int(input())
+                    
+                    if rule == BASICVALUE:
+                        print "type 0 to make lower cards have priority, and 1 to make higher cards have priority"
+                        newGreater = int(input())
+                        newGreater = False if newGreater == 0 else True
+                        game.basicValueConstraint.modify(newGreater)
                         return
-                    else:
-                        print "invalid character, try again"
+                        
+                    elif rule == WILDVALUE:
+                        print "type in a value between 2 and 14 to make that the new wild value"
+                        newValue = int(input())
+                        game.wildValueEffect.modify(newValue)
+                        return
+                        
+                    elif rule == WILDSUIT:
+                        while True:
+                            print "type in S, D, C, or H to change your suit"
+                            suit = raw_input().upper()
+                            if len(suit) == 1 and s in "SDCH":
+                                game.wildSuitEffect.modify(suit)
+                                return
+                            else:
+                                print "invalid character, try again"
+                except:
+                    print "Invalid entry, let's start fresh\n"
             
     
     #AI METHOD
