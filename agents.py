@@ -60,7 +60,7 @@ class RandomAgent(Agent):
             makeModification(rule)
         
         elif ruletype == WILDSUIT:
-            newSuit = random.choice(["D", "H", "S", "C"])
+            newSuit = random.choice(["D", "H", "S", "C", None])
             rule = Rule(WILDSUIT, newSuit)
             
             makeModification(rule)
@@ -203,13 +203,6 @@ class LearningAgent(Agent):
 
         self.beliefs.normalize()
 
-
-
-# s = State(Rule(BASICVALUE, True), Rule(BASICSUIT, None), Rule(WILDVALUE, 5), Rule(WILDSUIT, "H") )
-# 
-# c = Checker()
-# 
-# print c.isConsistent(n, s)
     
     # change a rule via the makeModification function, which takes a "rule" tuple as its only argument
     def modifyRule(self, makeModification):
