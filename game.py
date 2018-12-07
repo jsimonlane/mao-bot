@@ -223,13 +223,13 @@ pBot1 = LearningAgent("Learner")
 
 g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
 
-g.playGame(1)
+g.playGame(30)
 
 #print stats
 for player in g.players:
     print player.name
     print player.wins
-    if type(player) == LearningAgent:
+    if type(player) == LearningAgent or type(player) == RandomAgent:
         print np.average(player.validPercentByRound)
 
 
