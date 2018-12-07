@@ -216,11 +216,11 @@ class Game(object):
 
 # tests
 pHuman = RandomAgent("J")
-pBot = RandomAgent("Bot")
+pBot = LearningAgent("Learner")
 
 g = Game([pHuman, pBot], True)
 
-g.playGame(1000)
+g.playGame(25)
 
 #print stats
 for player in g.players:
