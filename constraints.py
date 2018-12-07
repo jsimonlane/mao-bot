@@ -2,10 +2,10 @@
 class Constraint(object):
     # returns a bool. True if the constraint should be activated
     # ex) maybe every time two cards of the same type are placed, the next player is skipped
-    def isActive(self, card):
+    def isActive(self, attemptedCard):
         pass
     
-    def isLegal(self, card):
+    def isLegal(self, attemptedCard, lastCard):
         pass
 
 
@@ -14,19 +14,18 @@ class BasicValueConstraint(Constraint):
     Tells you if higher or lower cards can be played, init with bool greater
       in general, if card is equal or (greater/less), then it is legal
     """
-    def __init__(self, greater, game): #greater is a boolean to say if greater values are allowed, or lower values are
+    def __init__(self, greater): #greater is a boolean to say if greater values are allowed, or lower values are
         self.greater = greater
-        self.game = game # way to refer back to the parent game
 
     # never conditionally active
     def isActive(self, attemptedCard):
         return True
     
-    def isLegal(self, attemptedCard):
+    def isLegal(self, attemptedCard, lastCard):
         if self.greater:
-            return attemptedCard.value >= self.game.lastCard.value
+            return attemptedCard.value >= lastCard.value
         else:
-            return attemptedCard.value <= self.game.lastCard.value
+            return attemptedCard.value <= lastCard.value
     
     def modify(self, greaterBool):
         """
@@ -40,27 +39,24 @@ class BasicSuitConstraint(Constraint):
     The basic constraint that says cards may be of the same suit 
       as the lastCard (card on top of the deck)
     """
-    def __init__(self, game):
-        self.game = game
     
     def isActive(self, attemptedCard):
         return True
     
-    def isLegal(self, card):
-        return card.suit == self.game.lastCard.suit
+    def isLegal(self, attemptedCard, lastCard):
+        return attemptedCard.suit == lastCard.suit
         
 class WildValueEffect(Constraint):
     """
     Allows for a "wild value"
     """
-    def __init__(self, game):
-        self.game = game
+    def __init__(self):
         self.wildValue = None #basic game rule
     
     def isActive(self, attemptedCard):
         return self.wildValue != None
     
-    def isLegal(self, attemptedCard):
+    def isLegal(self, attemptedCard, lastCard):
         return attemptedCard.value == self.wildValue
     
     def modify(self, value):
@@ -73,14 +69,13 @@ class WildSuitEffect(Constraint):
     """
     Allows for a "Wild Suit" -- this suit trumps all other suits
     """
-    def __init__(self, game):
-        self.game = game
+    def __init__(self):
         self.wildSuit = None
     
     def isActive(self, attemptedCard):
         return self.wildSuit != None
     
-    def isLegal(self, attemptedCard):
+    def isLegal(self, attemptedCard, lastCard):
         return attemptedCard.suit == self.wildSuit
     
     def modify(self, suit):

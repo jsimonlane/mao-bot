@@ -1,6 +1,8 @@
 import random
 from collections import namedtuple
 
+import constraints
+
 Card = namedtuple('Card', ['value', 'suit'])
 
 # rule settings
@@ -9,6 +11,13 @@ BASICVALUE = 1
 BASICSUIT = 2 # I don't think there's much we can do with this as of now
 WILDVALUE = 3
 WILDSUIT = 4
+
+
+State = namedtuple('State', ['basicValueRule', 'basicSuitRule', 'wildValueRule', 'wildSuitRule'])
+
+# checker.isConsistent(notification, ruleState)
+  # returns True if lastCard, attemptedCard is consistent with the given rule state
+
 
 #notification types
 Notification = namedtuple('Notification', ['type', 'attemptedCard', 'lastCard'])
@@ -62,9 +71,65 @@ class RoundHistory(object):
 
 
 
+
+#copy and paste
+class Checker(object):
+    def __init__(self):
+        self.basicValueConstraint = constraints.BasicValueConstraint(True)
+        self.basicSuitConstraint = constraints.BasicSuitConstraint()
+        self.wildValueEffect = constraints.WildValueEffect()
+        self.wildSuitEffect = constraints.WildSuitEffect()
+        self.lastCard = None
+
+    def makeModification(self, ruleTuple):
+        rule = ruleTuple.rule
+        setting = ruleTuple.setting
+
+        if rule == BASICVALUE:
+            self.basicValueConstraint.modify(setting)
+        elif rule == BASICSUIT:
+            pass
+        elif rule == WILDSUIT:
+            self.wildSuitEffect.modify(setting)
+        elif rule == WILDVALUE:
+            self.wildValueEffect.modify(setting)
+
+    def isLegal(self, attemptedCard):
+        """ 
+        Evaluates the card against the current constraints to see whether it is viable or not
+        Returns True or False
+        """
+        #try effects. needs only ONE to return True
+        wildEffects = [self.wildValueEffect, self.wildSuitEffect]
+
+        for effect in wildEffects:
+            if (effect.isActive(attemptedCard)):
+                if (effect.isLegal(attemptedCard, self.lastCard)):
+                    return True
+
+        # try the basics (ie, ordering and other). These are always active
+        # need only ONE to pass as true
+        basicConstraints = [self.basicValueConstraint, self.basicSuitConstraint]
+
+        for constraint in basicConstraints:
+            if (constraint.isLegal(attemptedCard, self.lastCard)):
+                return True
+        return False # if all the constraints pass, return true
+
+    def isConsistent(self, notification, ruleState):
+        # change the state
+        self.lastCard = notification.lastCard
+        for rule in ruleState:
+            self.makeModification(rule)
+        # see if is legal
+        return self.isLegal(notification.attemptedCard)
     
-    
-    
-    
-    
+
+# checker tests
+# n = Notification(LEGAL, Card(4, "H"), Card(7, "D"))
+# s = State(Rule(BASICVALUE, True), Rule(BASICSUIT, None), Rule(WILDVALUE, 5), Rule(WILDSUIT, "H") )
+# 
+# c = Checker()
+# 
+# print c.isConsistent(n, s)
 #

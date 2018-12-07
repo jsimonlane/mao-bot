@@ -1,18 +1,20 @@
 from infrastructure import *
 import constraints
+import numpy as np
+import time
+
 
 import copy
-from agents import *
-
+from agents import *        
 
 class Game(object):
     def __init__(self, players, autogame = True):
         
         # constraints
-        self.basicValueConstraint = constraints.BasicValueConstraint(True, self)
-        self.basicSuitConstraint = constraints.BasicSuitConstraint(self)
-        self.wildValueEffect = constraints.WildValueEffect(self)
-        self.wildSuitEffect = constraints.WildSuitEffect(self)
+        self.basicValueConstraint = constraints.BasicValueConstraint(True)
+        self.basicSuitConstraint = constraints.BasicSuitConstraint()
+        self.wildValueEffect = constraints.WildValueEffect()
+        self.wildSuitEffect = constraints.WildSuitEffect()
         
         # player stuff
         self.players = players
@@ -54,7 +56,7 @@ class Game(object):
         
         for effect in wildEffects:
             if (effect.isActive(attemptedCard)):
-                if (effect.isLegal(attemptedCard)):
+                if (effect.isLegal(attemptedCard, self.lastCard)):
                     return True
         
         # try the basics (ie, ordering and other). These are always active
@@ -62,7 +64,7 @@ class Game(object):
         basicConstraints = [self.basicValueConstraint, self.basicSuitConstraint]
         
         for constraint in basicConstraints:
-            if (constraint.isLegal(attemptedCard)):
+            if (constraint.isLegal(attemptedCard, self.lastCard)):
                 return True
         return False # if all the constraints pass, return true
         
@@ -81,7 +83,7 @@ class Game(object):
             if not self.autogame: print "LEGAL CARD PLAYED:", notification.attemptedCard, "\n"
         elif type == PENALTY:
             # self.roundHistory.recordMove(notification)
-            if not self.autogame: print "ILLEGAL CARD PLAYED:", notification.attempedCard, "\n"
+            if not self.autogame: print "ILLEGAL CARD PLAYED:", notification.attemptedCard, "\n"
         elif type == WON:
             if not self.autogame: print "Player", self.players[self.activePlayer].name, "won!"
         
@@ -204,7 +206,13 @@ class Game(object):
     def playGame(self, numRounds=10):
         winner = 0
         for i in range(numRounds):
+            if self.round % 1024 == 0:
+                t0 = time.time()
             winner = self.playRound(winner)
+            
+            if self.round % 1024 == 0:
+                t1 = time.time()
+                print "round", self.round, t1-t0
 
 # tests
 pHuman = RandomAgent("J")
@@ -218,7 +226,8 @@ g.playGame(1000)
 for player in g.players:
     print player.name
     print player.wins
-    if type(player) == RandomAgent: print player.validPercentByRound[0]
+    if type(player) == RandomAgent:
+        print np.average(player.validPercentByRound)
 
 
 
