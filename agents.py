@@ -192,14 +192,15 @@ class LearningAgent(Agent):
 
         states_agree = []
         c = Checker()
-        print notification.attemptedCard
-        print notification.type
         for state in self.all_states:
             if c.isConsistent(notification, state) == res:
                 states_agree.append(state)
 
-        for state in states_agree:
-            self.beliefs[state] += 5.0 / len(states_agree)
+        for state in self.all_states:
+            if state in states_agree:
+                self.beliefs[state] += 1.0 / len(states_agree)
+            else:
+                self.beliefs[state] = 0
 
         self.beliefs.normalize()
 
