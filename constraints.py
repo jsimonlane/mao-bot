@@ -7,7 +7,11 @@ class Constraint(object):
     
     def isLegal(self, attemptedCard, lastCard):
         pass
+        
 
+
+# initial state:
+#  State(Rule(BASICVALUE, True), Rule(BASICSUIT, None), Rule(WILDVALUE, None), Rule(WILDSUIT, None))
 
 class BasicValueConstraint(Constraint):
     """
@@ -45,6 +49,9 @@ class BasicSuitConstraint(Constraint):
     
     def isLegal(self, attemptedCard, lastCard):
         return attemptedCard.suit == lastCard.suit
+        
+    def modify(self):
+        pass
         
 class WildValueEffect(Constraint):
     """

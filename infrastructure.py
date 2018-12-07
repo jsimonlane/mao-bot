@@ -123,6 +123,7 @@ class Checker(object):
                 return True
         return False # if all the constraints pass, return true
 
+    # returns True if the notification last card and attempted card will be legal, given the ruleState
     def isConsistent(self, notification, ruleState):
         # change the state
         self.lastCard = notification.lastCard

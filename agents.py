@@ -2,6 +2,8 @@ from player import *
 import random
 import sys
 
+trueState = (Rule(BASICVALUE, True), Rule(BASICSUIT, None), Rule(WILDVALUE, None), Rule(WILDSUIT, None))
+
 class Agent(Player):
     def __init__(self, name):
         super(Player, self).__init__(name)    
@@ -147,29 +149,73 @@ class HumanAgent(Agent):
 
 class HmmAgent(Agent):
     def __init__(self, name):
-        super(Player, self).__init__(name)
+        super(Agent, self).__init__(name)
         
-        checker = Checker()
+        self.checker = Checker()
         self.beliefDistrib = Counter()
         
         # initialize list of states
+        initProb = 1 / float(len(stateList))
         for s in stateList:
-            self.beliefDistrib[s] = 0
-        
-        
-        
+            self.beliefDistrib[s] = initProb
     
     # return the card from your hand you want to play
     def chooseCard(self, lastCard):
-        pass #DO NOT CHANGE
+        probableState = self.beliefDistrib.argMax()
+        # print probableState
+        print "belief in probable state", self.beliefDistrib[probableState]
+        # for state in stateList:
+        #     print self.beliefDistrib[state]
+        # print probableState
+        # print self.beliefDistrib
+        okCards = []
+        for attemptedCard in self.hand:
+            n = Notification(LEGAL, attemptedCard, lastCard)
+            consistent = self.checker.isConsistent(n, probableState)
+            if consistent:
+                okCards.append(attemptedCard)
+        if len(okCards) > 0:
+            print "educated"
+            return okCards[0]
+        else:
+            print "stupid"
+            return self.hand[0]
     
     # notified of an event in the game (a penalty, a success, or a win)
     def notify(self, notification, game):
-        pass
         
-        pass #DO NOT CHANGE
-        # need to see if a counter is
-    
+        if notification.type == WON:
+            # simulate dynamics -- occurs only on new round change
+            print "reset"
+            #naive dynamics: reset the list
+            uniformProb = 1.0 / float(len(stateList))
+            for state in stateList:
+                self.beliefDistrib[state] = uniformProb # naive
+            return
+            
+            #complex dynamics:
+            # for each state with non-zero probability
+              # find successor states, and add them as possiblities. But weight towards current state
+              # then, renormalize the entire thing
+            
+        else:
+            # update probabilities based on state dynamics
+            for state in stateList: #same thing as belief distribution
+                if self.beliefDistrib[state] == 0:
+                    continue
+                else:
+                    isLegalGivenState = self.checker.isConsistent(notification, state)
+                    
+                    # when the notification and estimated outcome are the same
+                    if (notification.type == LEGAL and isLegalGivenState) or (notification.type == PENALTY and not isLegalGivenState):
+                        print "continued"
+                        continue
+                    else:
+                        # say state is impossible
+                        self.beliefDistrib[state] = 0
+            self.beliefDistrib.normalize()
+            return
+
     
     
     

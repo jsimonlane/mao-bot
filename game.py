@@ -22,7 +22,7 @@ class Game(object):
         self.autogame = autogame
         
         #deck stuff
-        self.startingHandSize = 5
+        self.startingHandSize = 10
         self.changeRuleRate = 1
         self.deck = Deck() #pre-shuffled deck
         self.pile = [] # a list of discarded cards. DIFFERENT FROM DECK OBJECT. 
@@ -215,12 +215,12 @@ class Game(object):
                 print "round", self.round, t1-t0
 
 # tests
-pHuman = RandomAgent("J")
+pHuman = HmmAgent("J")
 pBot = RandomAgent("Bot")
 
 g = Game([pHuman, pBot], True)
 
-g.playGame(1000)
+g.playGame(1)
 
 #print stats
 for player in g.players:
