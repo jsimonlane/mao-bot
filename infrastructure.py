@@ -15,8 +15,8 @@ WILDSUIT = 4
 
 State = namedtuple('State', ['basicValueRule', 'basicSuitRule', 'wildValueRule', 'wildSuitRule'])
 
+#initialize a list of states
 stateList = []
-
 for basicValue in [True, False]:
     for wildValue in [2,3,4,5,6,7,8,9,10,11,12,13,14,None]:
         for wildSuit in ["C", "H", "D", "S"]:
