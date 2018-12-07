@@ -60,7 +60,7 @@ class RandomAgent(Agent):
             makeModification(rule)
         
         elif ruletype == WILDSUIT:
-            newSuit = random.choice(["D", "H", "S", "C"])
+            newSuit = random.choice(["D", "H", "S", "C", None])
             rule = Rule(WILDSUIT, newSuit)
             
             makeModification(rule)
@@ -144,3 +144,39 @@ class HumanAgent(Agent):
         
     def notify(self, notification, game):
         pass
+
+class HmmAgent(Agent):
+    def __init__(self, name):
+        super(Player, self).__init__(name)
+        
+        checker = Checker()
+        self.beliefDistrib = Counter()
+        
+        # initialize list of states
+        for s in stateList:
+            self.beliefDistrib[s] = 0
+        
+        
+        
+    
+    # return the card from your hand you want to play
+    def chooseCard(self, lastCard):
+        pass #DO NOT CHANGE
+    
+    # notified of an event in the game (a penalty, a success, or a win)
+    def notify(self, notification, game):
+        pass
+        
+        pass #DO NOT CHANGE
+        # need to see if a counter is
+    
+    
+    
+    
+    # change a rule via the makeModification function, which takes a "rule" tuple as its only argument
+    def modifyRule(self, makeModification):
+        pass #DO NOT CHANGE
+
+    # this is how you know if the move you just made is legal or not
+    def getFeedback(self, isLegal):
+        pass # DO NOT CHANGE
