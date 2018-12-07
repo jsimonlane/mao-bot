@@ -147,10 +147,106 @@ class HumanAgent(Agent):
     def notify(self, notification, game):
         pass
 
+class LearningAgent(Agent):
+    def __init__(self, name):
+        super(Agent, self).__init__(name)
+        self.wins = 0
+        self.roundLegals = 0
+        self.roundIllegals = 0
+        self.validPercentByRound = []    
+        
+        self.beliefs = Counter()
+        suits = ['H', 'D', 'C', 'S', None]
+        self.all_states = []
+        for basicValue in [True,False]:
+            for i in [2,3,4,5,6,7,8,9,10,11,12,13,14, None]:
+                for suit in suits:
+                    for suit2 in suits:
+                        self.all_states.append(State(Rule(BASICVALUE, basicValue), Rule(BASICSUIT, suit), Rule(WILDVALUE, i), Rule(WILDSUIT, suit2) ))
+        
+        for state in self.all_states:
+            self.beliefs[state] = 0
+
+    # return the card from your hand you want to play
+    def chooseCard(self, lastCard):
+        belief_state = self.beliefs.argMax() 
+        legal_cards = []
+        c = Checker()
+        for index, card in enumerate(self.hand):
+            notification = Notification(LEGAL, card, lastCard)
+            if c.isConsistent(notification, belief_state):
+                legal_cards.append(card)
+
+        if len(legal_cards) != 0:
+            return random.choice(legal_cards)
+        else: 
+            return random.choice(self.hand)
+    
+    # notified of an event in the game (a penalty, a success, or a win)
+    def notify(self, notification, game):
+    # n = Notification(LEGAL, Card(4, "H"), Card(7, "D"))
+        def newRound():
+            if self.roundIllegals + self.roundLegals == 0: return #don't divide by 0
+            self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
+            self.roundLegals = 0
+            self.roundIllegals = 0
+        if notification.type == LEGAL:
+            res = True
+        elif notification.type == PENALTY:
+            res = False
+        elif notification.type == WON: #corresponds to "won"
+            newRound()
+            return
+
+        states_agree = []
+        c = Checker()
+        for state in self.all_states:
+            if c.isConsistent(notification, state) == res:
+                states_agree.append(state)
+
+        for state in self.all_states:
+            if state in states_agree:
+                self.beliefs[state] += 1.0 / len(states_agree)
+            else:
+                self.beliefs[state] = 0
+
+        self.beliefs.normalize()
+
+    
+    # change a rule via the makeModification function, which takes a "rule" tuple as its only argument
+    def modifyRule(self, makeModification):
+        ruletype = random.choice([BASICVALUE, WILDVALUE, WILDSUIT])
+        #
+        if ruletype == BASICVALUE:
+            newGreater = random.choice([True, False])
+            rule = Rule(BASICVALUE, newGreater)
+            
+            makeModification(rule)
+            
+        elif ruletype == WILDVALUE:
+            lst = [i + 2 for i in range(13)]
+            lst.append(None)
+            newValue = random.choice(lst)
+            rule = Rule(WILDVALUE, newValue)
+            
+            makeModification(rule)
+        
+        elif ruletype == WILDSUIT:
+            newSuit = random.choice(["D", "H", "S", "C"])
+            rule = Rule(WILDSUIT, newSuit)
+            
+            makeModification(rule)
+
+    # this is how you know if the move you just made is legal or not
+    def getFeedback(self, isLegal):
+        if isLegal:
+            self.roundLegals += 1
+        else:
+            self.roundIllegals += 1
+        
 class HmmAgent(Agent):
     def __init__(self, name):
         super(Agent, self).__init__(name)
-        
         self.checker = Checker()
         self.beliefDistrib = Counter()
         
@@ -215,14 +311,3 @@ class HmmAgent(Agent):
                         self.beliefDistrib[state] = 0
             self.beliefDistrib.normalize()
             return
-
-    
-    
-    
-    # change a rule via the makeModification function, which takes a "rule" tuple as its only argument
-    def modifyRule(self, makeModification):
-        pass #DO NOT CHANGE
-
-    # this is how you know if the move you just made is legal or not
-    def getFeedback(self, isLegal):
-        pass # DO NOT CHANGE

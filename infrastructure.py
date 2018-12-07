@@ -142,9 +142,6 @@ class Checker(object):
 # print c.isConsistent(n, s)
 #
 
-
-
-
 class Counter(dict):
     """
     A counter keeps track of counts for a set of keys.
@@ -357,3 +354,4 @@ class Counter(dict):
                 continue
             addend[key] = -1 * y[key]
         return addend
+

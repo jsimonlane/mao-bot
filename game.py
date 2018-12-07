@@ -215,10 +215,13 @@ class Game(object):
                 print "round", self.round, t1-t0
 
 # tests
-pHuman = HmmAgent("J")
-pBot = RandomAgent("Bot")
+pHuman = RandomAgent("J")
+pBotw = RandomAgent("A1")
+pBot2 = RandomAgent("A2")
+pBot = LearningAgent("Learner2")
+pBot1 = LearningAgent("Learner")
 
-g = Game([pHuman, pBot], True)
+g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
 
 g.playGame(1)
 
@@ -226,7 +229,7 @@ g.playGame(1)
 for player in g.players:
     print player.name
     print player.wins
-    if type(player) == RandomAgent:
+    if type(player) == LearningAgent:
         print np.average(player.validPercentByRound)
 
 
