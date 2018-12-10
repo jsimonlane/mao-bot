@@ -156,15 +156,8 @@ class LearningAgent(Agent):
         self.validPercentByRound = []    
         
         self.beliefs = Counter()
-        suits = ['H', 'D', 'C', 'S', None]
-        self.all_states = []
-        for basicValue in [True,False]:
-            for i in [2,3,4,5,6,7,8,9,10,11,12,13,14, None]:
-                for suit in suits:
-                    for suit2 in suits:
-                        self.all_states.append(State(Rule(BASICVALUE, basicValue), Rule(BASICSUIT, suit), Rule(WILDVALUE, i), Rule(WILDSUIT, suit2) ))
         
-        for state in self.all_states:
+        for state in stateList:
             self.beliefs[state] = 0
 
     # return the card from your hand you want to play
@@ -200,11 +193,11 @@ class LearningAgent(Agent):
 
         states_agree = []
         c = Checker()
-        for state in self.all_states:
+        for state in stateList:
             if c.isConsistent(notification, state) == res:
                 states_agree.append(state)
 
-        for state in self.all_states:
+        for state in stateList:
             if state in states_agree:
                 self.beliefs[state] += 1.0 / len(states_agree)
             else:
@@ -254,17 +247,9 @@ class HmmAgent(Agent):
         self.roundLegals = 0
         self.validPercentByRound = []
         
-        self.suits = ['H', 'D', 'C', 'S', None]
-        self.all_states = []
-        for basicValue in [True,False]:
-            for i in [2,3,4,5,6,7,8,9,10,11,12,13,14, None]:
-                for suit in self.suits:
-                    for suit2 in self.suits:
-                        self.all_states.append(State(Rule(BASICVALUE, basicValue), Rule(BASICSUIT, suit), Rule(WILDVALUE, i), Rule(WILDSUIT, suit2) ))
-        
         # initialize list of states
-        initProb = 1 / float(len(self.all_states))
-        for s in self.all_states:
+        initProb = 1 / float(len(stateList))
+        for s in stateList:
             self.beliefDistrib[s] = initProb
     
     # return the card from your hand you want to play
@@ -293,8 +278,8 @@ class HmmAgent(Agent):
         if notification.type == WON:
             # simulate dynamics -- occurs only on new round change
             #naive dynamics: reset the list
-            uniformProb = 1.0 / float(len(self.all_states))
-            for state in self.all_states:
+            uniformProb = 1.0 / float(len(stateList))
+            for state in stateList:
                 self.beliefDistrib[state] = uniformProb # naive
             self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
             self.roundLegals = 0
@@ -312,7 +297,7 @@ class HmmAgent(Agent):
             elif notification.type == PENALTY:
                 res = False
             # update probabilities based on state dynamics
-            for state in self.all_states: #same thing as belief distribution
+            for state in stateList: #same thing as belief distribution
                 if self.beliefDistrib[state] == 0:
                     continue
                 else:

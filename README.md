@@ -2,13 +2,18 @@
 An AI Framework that plays Mao. Lit.
 
 ## instructions to run
-	* run "python game.py". make modifications to the exact script your running at the bottom
-		of game.py
+* run "python game.py". make modifications to the exact script your running at the bottom
+	of game.py
 
 ## to-dos
-	* at this point, the infrastructure for the basic rules is done. 
-	* if we want to add more rules, we'll have to modify player, game, and constraints.
-	* otherwise, we just have to make more agents. see agent.py for the methods
+* at this point, the infrastructure for the basic rules is done. 
+* if we want to add more rules, we'll have to modify player, game, and constraints.
+* otherwise, we just have to make more agents. see agent.py for the methods
+
+## Observations -- put things you notice here
+* Going second is a big advantage for the learning agents, because they don't have to
+  take a shot in the dark.
+* Despite that, LearningAgent still oftentimes outperforms HmmAgent, even with HmmBot's 'second' advantage
 
 ## architecture
 
