@@ -2,7 +2,7 @@ from player import *
 import random
 import sys
 
-trueState = (Rule(BASICVALUE, True), Rule(BASICSUIT, None), Rule(WILDVALUE, None), Rule(WILDSUIT, None))
+trueState = State(Rule(BASICVALUE, True), Rule(BASICSUIT, "S"), Rule(WILDVALUE, None), Rule(WILDSUIT, None))
 
 class Agent(Player):
     def __init__(self, name):
@@ -250,43 +250,55 @@ class HmmAgent(Agent):
         self.checker = Checker()
         self.beliefDistrib = Counter()
         
+        self.roundIllegals = 0
+        self.roundLegals = 0
+        self.validPercentByRound = []
+        
+        self.suits = ['H', 'D', 'C', 'S', None]
+        self.all_states = []
+        for basicValue in [True,False]:
+            for i in [2,3,4,5,6,7,8,9,10,11,12,13,14, None]:
+                for suit in self.suits:
+                    for suit2 in self.suits:
+                        self.all_states.append(State(Rule(BASICVALUE, basicValue), Rule(BASICSUIT, suit), Rule(WILDVALUE, i), Rule(WILDSUIT, suit2) ))
+        
         # initialize list of states
-        initProb = 1 / float(len(stateList))
-        for s in stateList:
+        initProb = 1 / float(len(self.all_states))
+        for s in self.all_states:
             self.beliefDistrib[s] = initProb
     
     # return the card from your hand you want to play
     def chooseCard(self, lastCard):
-        probableState = self.beliefDistrib.argMax()
-        # print probableState
-        print "belief in probable state", self.beliefDistrib[probableState]
-        # for state in stateList:
-        #     print self.beliefDistrib[state]
-        # print probableState
-        # print self.beliefDistrib
-        okCards = []
-        for attemptedCard in self.hand:
-            n = Notification(LEGAL, attemptedCard, lastCard)
-            consistent = self.checker.isConsistent(n, probableState)
-            if consistent:
-                okCards.append(attemptedCard)
-        if len(okCards) > 0:
-            print "educated"
-            return okCards[0]
+        belief_state = self.beliefDistrib.argMax() 
+        legal_cards = []
+        for index, card in enumerate(self.hand):
+            notification = Notification(LEGAL, card, lastCard)
+            if self.checker.isConsistent(notification, belief_state):
+                legal_cards.append(card)
+
+        if len(legal_cards) != 0:
+            return random.choice(legal_cards)
+        else: 
+            return random.choice(self.hand)
+            
+    def getFeedback(self, isLegal):
+        if isLegal:
+            self.roundLegals += 1
         else:
-            print "stupid"
-            return self.hand[0]
+            self.roundIllegals += 1
     
     # notified of an event in the game (a penalty, a success, or a win)
     def notify(self, notification, game):
         
         if notification.type == WON:
             # simulate dynamics -- occurs only on new round change
-            print "reset"
             #naive dynamics: reset the list
-            uniformProb = 1.0 / float(len(stateList))
-            for state in stateList:
+            uniformProb = 1.0 / float(len(self.all_states))
+            for state in self.all_states:
                 self.beliefDistrib[state] = uniformProb # naive
+            self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
+            self.roundLegals = 0
+            self.roundIllegals = 0
             return
             
             #complex dynamics:
@@ -295,19 +307,17 @@ class HmmAgent(Agent):
               # then, renormalize the entire thing
             
         else:
+            if notification.type == LEGAL:
+                res = True
+            elif notification.type == PENALTY:
+                res = False
             # update probabilities based on state dynamics
-            for state in stateList: #same thing as belief distribution
+            for state in self.all_states: #same thing as belief distribution
                 if self.beliefDistrib[state] == 0:
                     continue
                 else:
-                    isLegalGivenState = self.checker.isConsistent(notification, state)
-                    
-                    # when the notification and estimated outcome are the same
-                    if (notification.type == LEGAL and isLegalGivenState) or (notification.type == PENALTY and not isLegalGivenState):
-                        print "continued"
+                    if self.checker.isConsistent(notification, state) == res:
                         continue
                     else:
-                        # say state is impossible
                         self.beliefDistrib[state] = 0
-            self.beliefDistrib.normalize()
             return

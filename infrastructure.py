@@ -16,14 +16,14 @@ WILDSUIT = 4
 State = namedtuple('State', ['basicValueRule', 'basicSuitRule', 'wildValueRule', 'wildSuitRule'])
 
 #initialize a list of states
-stateList = []
-for basicValue in [True, False]:
-    for wildValue in [2,3,4,5,6,7,8,9,10,11,12,13,14,None]:
-        for wildSuit in ["C", "H", "D", "S"]:
-            stateList.append(State(Rule(BASICVALUE, basicValue), \
-                                   Rule(BASICSUIT, None), \
-                                   Rule(WILDVALUE, wildValue), \
-                                   Rule(WILDSUIT, wildSuit) )  )
+# stateList = []
+# for basicValue in [True, False]:
+#     for wildValue in [2,3,4,5,6,7,8,9,10,11,12,13,14,None]:
+#         for wildSuit in ["C", "H", "D", "S"]:
+#             stateList.append(State(Rule(BASICVALUE, basicValue), \
+#                                    Rule(BASICSUIT, None), \
+#                                    Rule(WILDVALUE, wildValue), \
+#                                    Rule(WILDSUIT, wildSuit) )  )
 
 
 #notification types
@@ -354,4 +354,3 @@ class Counter(dict):
                 continue
             addend[key] = -1 * y[key]
         return addend
-
