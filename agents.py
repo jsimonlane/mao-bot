@@ -19,6 +19,11 @@ class Agent(Player):
     # change a rule via the makeModification function, which takes a "rule" tuple as its only argument
     def modifyRule(self, makeModification):
         pass #DO NOT CHANGE
+        
+    # choose an opponent index and a card to give an opponent
+    # Note: don't remove the card. Just return it. The game will remove it
+    def screwOpponent(self, otherPlayers):
+        pass # let's players give another player one of their cards
 
     # this is how you know if the move you just made is legal or not
     def getFeedback(self, isLegal):

@@ -68,7 +68,12 @@ class Player(object):
         Return 
         """
         pass
-    
+        
+    def screwOpponent(self, playerList):
+        """
+        AI implemented method -- let's players screw over an opponent
+        """
+        pass
 
     # AI IMPLEMENTED METHOD
     def notify(self, notification, game):
