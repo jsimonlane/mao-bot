@@ -22,6 +22,7 @@ class Agent(Player):
         
     # choose an opponent index and a card to give an opponent
     # Note: don't remove the card. Just return it. The game will remove it
+    # return a (targetIndex, unwantedCard) tuple.
     def screwOpponent(self, otherPlayers):
         pass # let's players give another player one of their cards
 
@@ -37,6 +38,18 @@ class RandomAgent(Agent):
         self.roundLegals = 0
         self.roundIllegals = 0
         self.validPercentByRound = []
+        
+    def screwOpponent(self, playerList):
+        targets = []
+        for i, player in enumerate(playerList):
+            if player.name != self.name:
+                targets.append(player)
+        if (targets.empty()):
+            print "this really shouldn't happen -- in screw opponent"
+            return (0, random.choice(self.hand)) #error checking
+        else:
+            return (random.choice(targets), random.choice(self.hand))
+                
     
     def notify(self, notification, game):
         def newRound():
@@ -111,9 +124,20 @@ class HumanAgent(Agent):
         
         
     def modifyRule(self, makeModification):
+        def getActiveValue():
+            print "type the value (from 2 to 14) you want to activate, or 0 to inactivate"
+            value = int(input())
+            if (value >= 2 and value <= 14):
+                return value
+            elif value == 0:
+                return None
+            else:
+                print "invalid -- try again"
+                
         while True:
             print "congrats, you get to change a rule! Please be precise"
-            print "type the rule you want to change -- 1 for basicValue, 3 for WildValue, and 4 for WildSuit"
+            print "type the rule you want to change:"
+            print "  1 for basicValue, 3 for WildValue, and 4 for WildSuit"
             rule = int(input())
             
             if rule == BASICVALUE:

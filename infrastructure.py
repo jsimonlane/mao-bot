@@ -11,6 +11,11 @@ BASICVALUE = 1
 BASICSUIT = 2 # I don't think there's much we can do with this as of now
 WILDVALUE = 3
 WILDSUIT = 4
+POISONCARD = 5
+POISONDIST = 6
+
+SCREWPLAYER = 7
+SKIPPLAYER = 8
 
 
 State = namedtuple('State', ['basicValueRule', 'basicSuitRule', 'wildValueRule', 'wildSuitRule'])

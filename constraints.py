@@ -71,25 +71,6 @@ class WildValueEffect(Constraint):
         Give it an int between [2,15] or None to change the rank of this constraint
         """
         self.wildValue = value
-        
-class PoisonCardConstraint(Constraint):
-    """ 
-    This card is always illegal
-    """
-    def __init__(self):
-        self.value = None # can be [2,14], or None
-    
-    def isActive(self, attemptedCard):
-        return self.value >= 2 and self.value <= 14
-    
-    def isLegal(self, attemptedCard, lastCard):
-        return attemptedCard != self.value
-    
-    def modify(self, dist):
-        if (dist >= 0 and dist <= 2):
-            self.dist = dist
-        else:
-            print "invalid setting for rule poisonDistanceEffect"
 
         
 class WildSuitEffect(Constraint):
@@ -110,6 +91,26 @@ class WildSuitEffect(Constraint):
         Give it a suit or None to change the value of this constraint
         """
         self.wildSuit = suit
+    
+        
+class PoisonCardConstraint(Constraint):
+    """ 
+    This card is always illegal
+    """
+    def __init__(self):
+        self.value = None # can be [2,14], or None
+    
+    def isActive(self, attemptedCard):
+        return self.value >= 2 and self.value <= 14
+    
+    def isLegal(self, attemptedCard, lastCard):
+        return attemptedCard != self.value
+    
+    def modify(self, dist):
+        if (dist >= 0 and dist <= 2):
+            self.dist = dist
+        else:
+            print "invalid setting for rule PoisonCardConstraint"
         
         
 class PoisonDistanceConstraint(Constraint):
@@ -118,7 +119,7 @@ class PoisonDistanceConstraint(Constraint):
     ex) if a 6 is down, and dist = 1, then playing a 5 or 7 would cause a two card penalty    
     """
     def __init__(self):
-        self.dist = 0 # can be 0, 1, or 2
+        self.dist = None # can be None, 1, or 2
     
     def isActive(self, attemptedCard):
         return self.dist == 1 or self.dist == 2
@@ -127,7 +128,7 @@ class PoisonDistanceConstraint(Constraint):
         return not (abs(attemptedCard.value - lastCard.value) == self.dist)
         
     def modify(self, dist):
-        if (dist >= 0 and dist <= 2):
+        if (dist == 1 or dist == 2):
             self.dist = dist
         else:
             print "invalid setting for rule poisonDistanceEffect"

@@ -23,31 +23,6 @@ class Effect(object):
         """
         Arguments vary. Modifies the state of the effect
         """
-            
-            
-
-# SERIOUSLY SKETCHED OUT BY activePlayer INCREMENTING -- implement last
-class SkipPlayerEffect(Effect):
-    def __init__(self):
-        self.activatingValue = None #should be a value in [2,14], or None
-        
-    def isActive(self, attemptedCard):
-        return attemptedCard.value == self.activatingValue
-        
-    def enactEffect(self, game):
-        # this really concerns me -- WATCH OUT
-        game.activePlayer = (game.activePlayer + 1) % len(game.players)
-        
-        notification = Notification() #make notification here. TODO
-        game.notifyAll()
-    
-    def modify(self, newActivatingValue):
-        if newActivatingValue == None or (newActivatingValue >= 2 and newActivatingValue <= 14):
-            self.activatingValue = self.newActivatingValue
-        else:
-            print "invalid activating value for SkipPlayer"
-
-
     
 class ScrewOpponentEffect(Effect):
     def __init__(self):
@@ -76,6 +51,27 @@ class ScrewOpponentEffect(Effect):
         else:
             print "invalid activating value for ScrewOpponent"
 
+
+# SERIOUSLY SKETCHED OUT BY activePlayer INCREMENTING -- implement last
+class SkipPlayerEffect(Effect):
+    def __init__(self):
+        self.activatingValue = None #should be a value in [2,14], or None
+        
+    def isActive(self, attemptedCard):
+        return attemptedCard.value == self.activatingValue
+        
+    def enactEffect(self, game):
+        # this really concerns me -- WATCH OUT
+        game.activePlayer = (game.activePlayer + 1) % len(game.players)
+        
+        notification = Notification() #make notification here. TODO
+        game.notifyAll()
+    
+    def modify(self, newActivatingValue):
+        if newActivatingValue == None or (newActivatingValue >= 2 and newActivatingValue <= 14):
+            self.activatingValue = self.newActivatingValue
+        else:
+            print "invalid activating value for SkipPlayer"
 
 
 
