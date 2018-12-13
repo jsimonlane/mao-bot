@@ -20,11 +20,23 @@ class Agent(Player):
     def modifyRule(self, makeModification):
         pass #DO NOT CHANGE
         
-    # choose an opponent index and a card to give an opponent
-    # Note: don't remove the card. Just return it. The game will remove it
-    # return a (targetIndex, unwantedCard) tuple.
-    def screwOpponent(self, otherPlayers):
-        pass # let's players give another player one of their cards
+    # # choose an opponent index and a card to give an opponent
+    # # Note: don't remove the card. Just return it. The game will remove it
+    # # return a (targetIndex, unwantedCard) tuple.
+    # def screwOpponent(self, otherPlayers):
+    #     pass # let's players give another player one of their cards
+    
+    # put here to avoid copy-paste into all agents. NOTE: Change eventually.
+    def screwOpponent(self, playerList):
+        targets = []
+        for i, player in enumerate(playerList):
+            if player.name != self.name:
+                targets.append(player)
+        if (targets.empty()):
+            print "this really shouldn't happen -- in screw opponent"
+            return (0, random.choice(self.hand)) #error checking
+        else:
+            return (random.choice(targets), random.choice(self.hand))
 
     # this is how you know if the move you just made is legal or not
     def getFeedback(self, isLegal):
@@ -101,16 +113,20 @@ class HumanAgent(Agent):
     def __init__(self, name):
         super(Agent, self).__init__(name)
     
-    def chooseCard(self, lastCard):
+    def chooseCard(self, lastCard, aggressive=False):
         def showHand():
             for index, card in enumerate(self.hand):
                 print "Index:", index, " -- ", card
         while True:
             # show your hand
-            print "the LAST CARD that was played was:", lastCard
+            if not aggressive:
+                print "the LAST CARD that was played was:", lastCard
             print "your hand is: \n"
             showHand()
-            print "\ntype the index of the card you want to play: "
+            if aggressive:
+                print "\nWhich card are you tryna stick your opponent with?"
+            else:
+                print "\ntype the index of the card you want to play: "
             
             instr = raw_input()
             if instr == "q":
@@ -122,6 +138,13 @@ class HumanAgent(Agent):
             except:
                 print "\n\n**INVALID SELECTION** Try again: \n\n"
         
+    def screwOpponent(self, playerList):
+        print "choose the opponent you want to screw over (by typing their index)"
+        for i, player in enumerate(playerList):
+            print "Index:", i, " -- ", player.name, "Tot cards: ", len(player.hand)
+        targetIndex = input()
+        unwantedCard = self.chooseCard(None, True)
+        return (targetIndex, unwantedCard)
         
     def modifyRule(self, makeModification):
         def getActiveValue():
@@ -138,6 +161,7 @@ class HumanAgent(Agent):
             print "congrats, you get to change a rule! Please be precise"
             print "type the rule you want to change:"
             print "  1 for basicValue\n  3 for WildValue\n  4 for WildSuit \n  5 for PoisonDist"
+            print "  6 for PoisonCard\n  7 for ScrewOpponent\n  8 for SkipPlayer"
             rule = int(input())
             
             if rule == BASICVALUE:

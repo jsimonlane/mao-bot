@@ -55,7 +55,7 @@ class ScrewOpponentEffect(Effect):
 # SERIOUSLY SKETCHED OUT BY activePlayer INCREMENTING -- implement last
 class SkipPlayerEffect(Effect):
     def __init__(self):
-        self.activatingValue = 10 #should be a value in [2,14], or None
+        self.activatingValue = None #should be a value in [2,14], or None
         
     def isActive(self, attemptedCard):
         return attemptedCard.value == self.activatingValue

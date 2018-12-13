@@ -29,7 +29,7 @@ class Game(object):
         self.autogame = autogame
         
         #deck stuff
-        self.startingHandSize = 10
+        self.startingHandSize = 5
         self.changeRuleRate = 1
         self.deck = Deck() #pre-shuffled deck
         self.pile = [] # a list of discarded cards. DIFFERENT FROM DECK OBJECT. 
@@ -150,8 +150,8 @@ class Game(object):
         if self.poisonCardEffect.isActive(attemptedCard):
             self.poisonCardEffect.enactEffect(self, attemptedCard) #includes notification
 
-        # if self.screwOpponentEffect.isActive(attemptedCard):
-        #     self.screwOpponentEffect.enactEffect(self, attemptedCard) #includes notification
+        if self.screwOpponentEffect.isActive(attemptedCard):
+            self.screwOpponentEffect.enactEffect(self, attemptedCard) #includes notification
             
 
         if self.skipPlayerEffect.isActive(attemptedCard):
