@@ -1,5 +1,6 @@
 from infrastructure import *
 import constraints
+import effects
 import numpy as np
 import time
 
@@ -13,9 +14,12 @@ class Game(object):
         # constraints
         self.basicValueConstraint = constraints.BasicValueConstraint(True)
         self.basicSuitConstraint = constraints.BasicSuitConstraint()
-        self.wildValueEffect = constraints.WildValueEffect()
+        self.wildValueConstraint = constraints.WildValueConstraint()
         self.wildSuitEffect = constraints.WildSuitEffect()
         self.poisonDistanceConstraint = constraints.PoisonDistanceConstraint()
+        
+        self.poisonCardEffect = effects.PoisonCardEffect()
+        
         
         # player stuff
         self.players = players
@@ -45,9 +49,8 @@ class Game(object):
         elif rule == WILDSUIT:
             self.wildSuitEffect.modify(setting)
         elif rule == WILDVALUE:
-            self.wildValueEffect.modify(setting)
+            self.wildValueConstraint.modify(setting)
         elif rule == POISONDIST:
-            print "here"
             self.poisonDistanceConstraint.modify(setting)
             
     def isLegal(self, attemptedCard):
@@ -62,9 +65,9 @@ class Game(object):
                 return False
         
         #try effects. needs only ONE to return True
-        wildEffects = [self.wildValueEffect, self.wildSuitEffect]
+        wildConstraints = [self.wildValueConstraint, self.wildSuitEffect]
         
-        for effect in wildEffects:
+        for effect in wildConstraints:
             if (effect.isActive(attemptedCard)):
                 if (effect.isLegal(attemptedCard, self.lastCard)):
                     return True
@@ -96,6 +99,13 @@ class Game(object):
             if not self.autogame: print "ILLEGAL CARD PLAYED:", notification.attemptedCard, "\n"
         elif type == WON:
             if not self.autogame: print "Player", self.players[self.activePlayer].name, "won!"
+        elif type == POISONCARD:
+            if not self.autogame: print "PENALTY CARD from:", notification.attemptedCard, "\n"
+        elif type == SKIPPLAYER:
+            if not self.autogame: print "SKIP PLAYER using:", notification.attemptedCard, "\n"
+        elif type == SCREWPLAYER:
+            if not self.autogame: print "SCREWING PLAYER using:", notification.attemptedCard, "\n"
+        
         
         for player in self.players:
             player.notify(notification, self)
@@ -121,6 +131,26 @@ class Game(object):
                 return self.getCardFromDeck() #recurse, try to get another card
         else:
             return card
+            
+    def enactEffects(self, attemptedCard):
+        """
+        Returns a boolean, "skip_enacted" -- true if skipped, false if not.
+          Needed to properly tune activePlayer, because skip does some weird stuff
+        """
+        
+        if self.poisonCardEffect.isActive(attemptedCard):
+            self.poisonCardEffect.enactEffect(self, attemptedCard) #includes notification
+
+        # if self.screwOpponentEffect.isActive(attemptedCard):
+        #     self.screwOpponentEffect.enactEffect(self, attemptedCard) #includes notification
+            
+
+        # if self.skipPlayerEffect.isActive(attemptedCard):
+        #     self.skipPlayerEffect.enactEffect(self, attemptedCard) #includes notification
+        #     return True
+        
+        return False
+        
     
     # describes what happens during a player turn
     #    
@@ -133,14 +163,14 @@ class Game(object):
         """
         attemptedCard = player.takeAction(self.lastCard) # the player tries to play a card
         lastCard = self.lastCard
-        feedback = self.isLegal(attemptedCard) # the card is evaluated for legality
+        feedback = self.isLegal(attemptedCard) # the CONSTRAINTS for legality
         
         if feedback == LEGAL:
             # game state bookkeeping -- last card, and the pile
             self.pile.append(attemptedCard)
             self.lastCard = attemptedCard
             
-            #tell player of legality
+            #tell the player their move worked
             player.getFeedback(True)
             
             # notify all players of legality
@@ -151,6 +181,16 @@ class Game(object):
             if player.won():
                 return WON
             else:
+                # enact effects
+                skipEnacted = self.enactEffects(attemptedCard)
+                
+                # test that player didn't win by handing off a card
+                if player.won():
+                    if skipEnacted:
+                        # go back a player to handle skip special case (ie, don't screw with player order)
+                        self.activePlayer = (self.activePlayer + len(players) - 1) % len(players)
+                    return WON
+                
                 return 0
         else:
             # return the card to the player, and penalize them with a new card
@@ -206,10 +246,9 @@ class Game(object):
         self.gameHistory.addRound(self.roundHistory)
         self.round += 1
         
-        # modify the rules every fifth round
+        # modify the rules every few rounds round
         if (self.round % self.changeRuleRate == 0):
             self.players[self.activePlayer].modifyRule(self.makeModification) #pass the method as an argument
-        print "modified"
         return self.activePlayer
         
     

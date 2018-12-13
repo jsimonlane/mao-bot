@@ -13,7 +13,7 @@ class Effect(object):
         """
         pass
         
-    def enactEffect(self, game):
+    def enactEffect(self, game, attemptedCard):
         """
         Modifies the state of the game. Ensure to include a "notify all"
         """
@@ -31,7 +31,7 @@ class ScrewOpponentEffect(Effect):
     def isActive(self, attemptedCard):
         return attemptedCard.value == self.activatingValue
         
-    def enactEffect(self, game):
+    def enactEffect(self, game, attemptedCard):
         # if the player has a card to give, let them give a card
         # i think this is all done by reference, so we should be ok
         activePlayer = game.players[game.activePlayer]
@@ -41,8 +41,8 @@ class ScrewOpponentEffect(Effect):
             activePlayer.hand.remove(unwantedCard)
             game.players[targetIndex].hand.append(unwantedCard)
     
-        notification = Notification() #make notification here. TODO
-        game.notifyAll()
+        notification = Notification(SCREWPLAYER, attemptedCard, None) #make notification here. TODO
+        game.notifyAll(notification)
         
     
     def modify(self, newActivatingValue):
@@ -60,11 +60,11 @@ class SkipPlayerEffect(Effect):
     def isActive(self, attemptedCard):
         return attemptedCard.value == self.activatingValue
         
-    def enactEffect(self, game):
+    def enactEffect(self, game, attemptedCard):
         # this really concerns me -- WATCH OUT
         game.activePlayer = (game.activePlayer + 1) % len(game.players)
         
-        notification = Notification() #make notification here. TODO
+        notification = Notification(SKIPPLAYER, attemptedCard, None) #make notification here. TODO
         game.notifyAll()
     
     def modify(self, newActivatingValue):
@@ -81,13 +81,23 @@ class PoisonCardEffect(Effect):
     Playing this card, esp when it's illegal, means you're getting hammered
     """
     def __init__(self):
-        self.value = None # can be [2,14], or None
+        self.value = 10 # can be [2,14], or None
     
     def isActive(self, attemptedCard):
-        return (self.value >= 2 and self.value <= 14) and (attemptedCard != self.value)
+        print "active"
+        return (self.value >= 2 and self.value <= 14) and (attemptedCard.value == self.value)
+        
+    def enactEffect(self, game, attemptedCard):
+        activePlayer = game.players[game.activePlayer]
+        
+        penaltyCard = game.getCardFromDeck()
+        if (penaltyCard):
+            activePlayer.hand.append(penaltyCard)
+        notification = Notification(POISONCARD, attemptedCard, None)
+        game.notifyAll(notification)
     
     def modify(self, dist):
-        if (dist >= 0 and dist <= 2):
+        if (dist >= 2 or dist <= 14) or dist == None:
             self.dist = dist
         else:
             print "invalid setting for rule PoisonCardConstraint"

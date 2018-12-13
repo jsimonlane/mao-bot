@@ -53,7 +53,7 @@ class BasicSuitConstraint(Constraint):
     def modify(self):
         pass
         
-class WildValueEffect(Constraint):
+class WildValueConstraint(Constraint):
     """
     Allows for a "wild value"
     """
@@ -108,7 +108,7 @@ class PoisonDistanceConstraint(Constraint):
         return not (abs(attemptedCard.value - lastCard.value) == self.dist)
         
     def modify(self, dist):
-        if (dist == 1 or dist == 2):
+        if (dist == 1 or dist == 2) or dist == None:
             self.dist = dist
         else:
             print "invalid setting for rule poisonDistanceConstraint"

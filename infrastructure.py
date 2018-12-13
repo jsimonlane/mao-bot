@@ -36,6 +36,10 @@ Notification = namedtuple('Notification', ['type', 'attemptedCard', 'lastCard'])
 LEGAL = 1
 PENALTY = 2
 WON = 3
+# NOTE: These are also used as effect-signalers in notifications
+# POISONCARD = 6
+# SCREWPLAYER = 7
+# SKIPPLAYER = 8
 
 
 class Deck(object):
@@ -88,7 +92,7 @@ class Checker(object):
     def __init__(self):
         self.basicValueConstraint = constraints.BasicValueConstraint(True)
         self.basicSuitConstraint = constraints.BasicSuitConstraint()
-        self.wildValueEffect = constraints.WildValueEffect()
+        self.wildValueConstraint = constraints.WildValueConstraint()
         self.wildSuitEffect = constraints.WildSuitEffect()
         self.poisonDistanceConstraint = constraints.PoisonDistanceConstraint()
         self.lastCard = None
@@ -104,7 +108,7 @@ class Checker(object):
         elif rule == WILDSUIT:
             self.wildSuitEffect.modify(setting)
         elif rule == WILDVALUE:
-            self.wildValueEffect.modify(setting)
+            self.wildValueConstraint.modify(setting)
 
     def isLegal(self, attemptedCard):
         """ 
@@ -117,9 +121,9 @@ class Checker(object):
                 return False
         
         #try effects. needs only ONE to return True
-        wildEffects = [self.wildValueEffect, self.wildSuitEffect]
+        wildConstraints = [self.wildValueConstraint, self.wildSuitEffect]
 
-        for effect in wildEffects:
+        for effect in wildConstraints:
             if (effect.isActive(attemptedCard)):
                 if (effect.isLegal(attemptedCard, self.lastCard)):
                     return True
