@@ -137,7 +137,7 @@ class HumanAgent(Agent):
         while True:
             print "congrats, you get to change a rule! Please be precise"
             print "type the rule you want to change:"
-            print "  1 for basicValue, 3 for WildValue, and 4 for WildSuit"
+            print "  1 for basicValue\n  3 for WildValue\n  4 for WildSuit \n  5 for PoisonDist"
             rule = int(input())
             
             if rule == BASICVALUE:
@@ -145,17 +145,18 @@ class HumanAgent(Agent):
                 newGreater = int(input())
                 newGreater = False if newGreater == 0 else True
                 
-                rule = Rule(BASICVALUE, newGreater)
-                makeModification(rule)
+                ruleTuple = Rule(BASICVALUE, newGreater)
+                makeModification(ruleTuple)
                 
                 return
                 
             elif rule == WILDVALUE:
-                print "type in a value between 2 and 14 to make that the new wild value"
-                newValue = int(input())
+                # print "type in a value between 2 and 14 to make that the new wild value"
+                # newValue = int(input())
+                newValue = getActiveValue()
                 
-                rule = Rule(WILDVALUE, newValue)
-                makeModification(rule)
+                ruleTuple = Rule(rule, newValue)
+                makeModification(ruleTuple)
                 
                 return
                 
@@ -165,13 +166,24 @@ class HumanAgent(Agent):
                     suit = raw_input().upper()
                     if len(suit) == 1 and suit in "SDCH":
                         
-                        rule = Rule(WILDVALUE, suit)
-                        makeModification(rule)
+                        ruleTuple = Rule(WILDVALUE, suit)
+                        makeModification(ruleTuple)
                         
                         return
                     else:
                         print "invalid character, try again"
-        
+            elif rule == POISONDIST:
+                print "type 1 or 2 to make either 1 or 2 distance poisonous, and 0 to inactivate"
+                result = input()
+                if result == 0:
+                    value = None
+                elif result == 1 or result == 2:
+                    value = result
+                else:
+                    print "invalid selection"
+                    return
+                makeModification((Rule(POISONDIST, value)))
+                return
         
     def notify(self, notification, game):
         pass

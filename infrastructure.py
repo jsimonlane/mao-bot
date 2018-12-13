@@ -11,9 +11,9 @@ BASICVALUE = 1
 BASICSUIT = 2 # I don't think there's much we can do with this as of now
 WILDVALUE = 3
 WILDSUIT = 4
-POISONCARD = 5
-POISONDIST = 6
+POISONDIST = 5
 
+POISONCARD = 6
 SCREWPLAYER = 7
 SKIPPLAYER = 8
 
@@ -23,7 +23,7 @@ State = namedtuple('State', ['basicValueRule', 'basicSuitRule', 'wildValueRule',
 #initialize a list of states
 stateList = []
 suits = ['H', 'D', 'C', 'S', None]
-for basicValue in [True,False]:
+for basicValue in [True, False]:
     for i in [2,3,4,5,6,7,8,9,10,11,12,13,14, None]:
         for suit in suits:
             for suit2 in suits:
@@ -90,6 +90,7 @@ class Checker(object):
         self.basicSuitConstraint = constraints.BasicSuitConstraint()
         self.wildValueEffect = constraints.WildValueEffect()
         self.wildSuitEffect = constraints.WildSuitEffect()
+        self.poisonDistanceConstraint = constraints.PoisonDistanceConstraint()
         self.lastCard = None
 
     def makeModification(self, ruleTuple):
@@ -110,6 +111,11 @@ class Checker(object):
         Evaluates the card against the current constraints to see whether it is viable or not
         Returns True or False
         """
+        #poison distance is the most powerful effect
+        if self.poisonDistanceConstraint.isActive(attemptedCard):
+            if (not self.poisonDistanceConstraint.isLegal(attemptedCard, self.lastCard)):
+                return False
+        
         #try effects. needs only ONE to return True
         wildEffects = [self.wildValueEffect, self.wildSuitEffect]
 

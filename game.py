@@ -15,6 +15,7 @@ class Game(object):
         self.basicSuitConstraint = constraints.BasicSuitConstraint()
         self.wildValueEffect = constraints.WildValueEffect()
         self.wildSuitEffect = constraints.WildSuitEffect()
+        self.poisonDistanceConstraint = constraints.PoisonDistanceConstraint()
         
         # player stuff
         self.players = players
@@ -22,7 +23,7 @@ class Game(object):
         self.autogame = autogame
         
         #deck stuff
-        self.startingHandSize = 10
+        self.startingHandSize = 2
         self.changeRuleRate = 1
         self.deck = Deck() #pre-shuffled deck
         self.pile = [] # a list of discarded cards. DIFFERENT FROM DECK OBJECT. 
@@ -45,12 +46,21 @@ class Game(object):
             self.wildSuitEffect.modify(setting)
         elif rule == WILDVALUE:
             self.wildValueEffect.modify(setting)
-        
+        elif rule == POISONDIST:
+            print "here"
+            self.poisonDistanceConstraint.modify(setting)
+            
     def isLegal(self, attemptedCard):
         """ 
         Evaluates the card against the current constraints to see whether it is viable or not
         Returns True or False
         """
+        
+        #poison distance is the most powerful effect
+        if self.poisonDistanceConstraint.isActive(attemptedCard):
+            if (not self.poisonDistanceConstraint.isLegal(attemptedCard, self.lastCard)):
+                return False
+        
         #try effects. needs only ONE to return True
         wildEffects = [self.wildValueEffect, self.wildSuitEffect]
         
@@ -199,7 +209,7 @@ class Game(object):
         # modify the rules every fifth round
         if (self.round % self.changeRuleRate == 0):
             self.players[self.activePlayer].modifyRule(self.makeModification) #pass the method as an argument
-        
+        print "modified"
         return self.activePlayer
         
     
@@ -215,15 +225,15 @@ class Game(object):
                 print "round", self.round, t1-t0
 
 # tests
-pHuman = HmmAgent("J")
+pHuman = HumanAgent("J")
 # pBotw = RandomAgent("A1")
 # pBot2 = RandomAgent("A2")
 # pBot = LearningAgent("Learner2")
-pBot1 = LearningAgent("Learner")
+pBot1 = RandomAgent("Learner")
 
 # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
-g = Game([pBot1, pHuman])
-g.playGame(10)
+g = Game([pHuman, pBot1], False)
+g.playGame(2)
 
 #print stats
 for player in g.players:

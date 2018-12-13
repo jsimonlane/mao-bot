@@ -19,9 +19,9 @@ class Effect(object):
         """
         pass
         
-    def modify(self):
+    def modify(self, activatingValue):
         """
-        Arguments vary. Modifies the state of the effect
+        All these cards can have values 2-14, or none
         """
     
 class ScrewOpponentEffect(Effect):
@@ -74,6 +74,23 @@ class SkipPlayerEffect(Effect):
             print "invalid activating value for SkipPlayer"
 
 
+# NEED TO MODIFY THIS
+class PoisonCardEffect(Effect):
+    """ 
+    This card can be played, but you have to draw another card.
+    Playing this card, esp when it's illegal, means you're getting hammered
+    """
+    def __init__(self):
+        self.value = None # can be [2,14], or None
+    
+    def isActive(self, attemptedCard):
+        return (self.value >= 2 and self.value <= 14) and (attemptedCard != self.value)
+    
+    def modify(self, dist):
+        if (dist >= 0 and dist <= 2):
+            self.dist = dist
+        else:
+            print "invalid setting for rule PoisonCardConstraint"
 
 
 

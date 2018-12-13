@@ -6,9 +6,9 @@ An AI Framework that plays Mao. Lit.
 	of game.py
 
 ## to-dos
-* at this point, the infrastructure for the basic rules is done. 
-* if we want to add more rules, we'll have to modify player, game, and constraints.
-* otherwise, we just have to make more agents. see agent.py for the methods
+* Constraints are done.
+* Effects are done.
+* Need to update RandomAgent and HMM Agent to a) change and b) recognize PoisonDist
 
 ## Observations -- put things you notice here
 * Going second is a big advantage for the learning agents, because they don't have to

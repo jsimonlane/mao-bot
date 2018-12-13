@@ -91,26 +91,6 @@ class WildSuitEffect(Constraint):
         Give it a suit or None to change the value of this constraint
         """
         self.wildSuit = suit
-    
-        
-class PoisonCardConstraint(Constraint):
-    """ 
-    This card is always illegal
-    """
-    def __init__(self):
-        self.value = None # can be [2,14], or None
-    
-    def isActive(self, attemptedCard):
-        return self.value >= 2 and self.value <= 14
-    
-    def isLegal(self, attemptedCard, lastCard):
-        return attemptedCard != self.value
-    
-    def modify(self, dist):
-        if (dist >= 0 and dist <= 2):
-            self.dist = dist
-        else:
-            print "invalid setting for rule PoisonCardConstraint"
         
         
 class PoisonDistanceConstraint(Constraint):
@@ -131,6 +111,6 @@ class PoisonDistanceConstraint(Constraint):
         if (dist == 1 or dist == 2):
             self.dist = dist
         else:
-            print "invalid setting for rule poisonDistanceEffect"
+            print "invalid setting for rule poisonDistanceConstraint"
     
         
