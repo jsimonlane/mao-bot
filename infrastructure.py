@@ -14,7 +14,7 @@ WILDSUIT = 4
 POISONDIST = 5
 
 POISONCARD = 6
-SCREWPLAYER = 7
+SCREWOPPONENT = 7
 SKIPPLAYER = 8
 
 
@@ -38,7 +38,7 @@ PENALTY = 2
 WON = 3
 # NOTE: These are also used as effect-signalers in notifications
 # POISONCARD = 6
-# SCREWPLAYER = 7
+# SCREWOPPONENT = 7
 # SKIPPLAYER = 8
 
 

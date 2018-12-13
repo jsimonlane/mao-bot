@@ -172,6 +172,7 @@ class HumanAgent(Agent):
                         return
                     else:
                         print "invalid character, try again"
+                        
             elif rule == POISONDIST:
                 print "type 1 or 2 to make either 1 or 2 distance poisonous, and 0 to inactivate"
                 result = input()
@@ -184,6 +185,10 @@ class HumanAgent(Agent):
                     return
                 makeModification((Rule(POISONDIST, value)))
                 return
+            
+            elif rule == POISONCARD or rule == SKIPPLAYER or rule == SCREWOPPONENT:
+                value = getActiveValue() #returns a value between 2-14 or None
+                makeModification(Rule(rule, value))
         
     def notify(self, notification, game):
         pass

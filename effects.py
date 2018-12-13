@@ -41,7 +41,7 @@ class ScrewOpponentEffect(Effect):
             activePlayer.hand.remove(unwantedCard)
             game.players[targetIndex].hand.append(unwantedCard)
     
-        notification = Notification(SCREWPLAYER, attemptedCard, None) #make notification here. TODO
+        notification = Notification(SCREWOPPONENT, attemptedCard, None) #make notification here. TODO
         game.notifyAll(notification)
         
     
@@ -55,7 +55,7 @@ class ScrewOpponentEffect(Effect):
 # SERIOUSLY SKETCHED OUT BY activePlayer INCREMENTING -- implement last
 class SkipPlayerEffect(Effect):
     def __init__(self):
-        self.activatingValue = None #should be a value in [2,14], or None
+        self.activatingValue = 10 #should be a value in [2,14], or None
         
     def isActive(self, attemptedCard):
         return attemptedCard.value == self.activatingValue
@@ -65,7 +65,7 @@ class SkipPlayerEffect(Effect):
         game.activePlayer = (game.activePlayer + 1) % len(game.players)
         
         notification = Notification(SKIPPLAYER, attemptedCard, None) #make notification here. TODO
-        game.notifyAll()
+        game.notifyAll(notification)
     
     def modify(self, newActivatingValue):
         if newActivatingValue == None or (newActivatingValue >= 2 and newActivatingValue <= 14):
@@ -81,11 +81,10 @@ class PoisonCardEffect(Effect):
     Playing this card, esp when it's illegal, means you're getting hammered
     """
     def __init__(self):
-        self.value = 10 # can be [2,14], or None
+        self.value = None # can be [2,14], or None
     
     def isActive(self, attemptedCard):
-        print "active"
-        return (self.value >= 2 and self.value <= 14) and (attemptedCard.value == self.value)
+        return attemptedCard.value == self.value
         
     def enactEffect(self, game, attemptedCard):
         activePlayer = game.players[game.activePlayer]

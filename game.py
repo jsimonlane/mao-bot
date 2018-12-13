@@ -19,6 +19,8 @@ class Game(object):
         self.poisonDistanceConstraint = constraints.PoisonDistanceConstraint()
         
         self.poisonCardEffect = effects.PoisonCardEffect()
+        self.skipPlayerEffect = effects.SkipPlayerEffect()
+        self.screwOpponentEffect = effects.ScrewOpponentEffect()
         
         
         # player stuff
@@ -27,7 +29,7 @@ class Game(object):
         self.autogame = autogame
         
         #deck stuff
-        self.startingHandSize = 2
+        self.startingHandSize = 10
         self.changeRuleRate = 1
         self.deck = Deck() #pre-shuffled deck
         self.pile = [] # a list of discarded cards. DIFFERENT FROM DECK OBJECT. 
@@ -52,6 +54,12 @@ class Game(object):
             self.wildValueConstraint.modify(setting)
         elif rule == POISONDIST:
             self.poisonDistanceConstraint.modify(setting)
+        elif rule == SCREWOPPONENT:
+            self.screwOpponentEffect.modify(setting)
+        elif rule == SKIPPLAYER:
+            self.skipPlayerEffect.modify(setting)
+        elif rule == POISONCARD:
+            self.poisonCardEffect.modify(setting)
             
     def isLegal(self, attemptedCard):
         """ 
@@ -90,7 +98,7 @@ class Game(object):
         # print stuff for human players for human players
         type = notification.type
         
-        if not self.autogame: print self.players[self.activePlayer].name
+        if not self.autogame and not type == SKIPPLAYER: print self.players[self.activePlayer].name
         if type == LEGAL:
             # self.roundHistory.recordMove(notification)
             if not self.autogame: print "LEGAL CARD PLAYED:", notification.attemptedCard, "\n"
@@ -102,8 +110,9 @@ class Game(object):
         elif type == POISONCARD:
             if not self.autogame: print "PENALTY CARD from:", notification.attemptedCard, "\n"
         elif type == SKIPPLAYER:
-            if not self.autogame: print "SKIP PLAYER using:", notification.attemptedCard, "\n"
-        elif type == SCREWPLAYER:
+            if not self.autogame: 
+                print "SKIPPING PLAYER", self.players[self.activePlayer].name, "using", notification.attemptedCard, "\n"
+        elif type == SCREWOPPONENT:
             if not self.autogame: print "SCREWING PLAYER using:", notification.attemptedCard, "\n"
         
         
@@ -145,9 +154,9 @@ class Game(object):
         #     self.screwOpponentEffect.enactEffect(self, attemptedCard) #includes notification
             
 
-        # if self.skipPlayerEffect.isActive(attemptedCard):
-        #     self.skipPlayerEffect.enactEffect(self, attemptedCard) #includes notification
-        #     return True
+        if self.skipPlayerEffect.isActive(attemptedCard):
+            self.skipPlayerEffect.enactEffect(self, attemptedCard) #includes notification
+            return True
         
         return False
         
