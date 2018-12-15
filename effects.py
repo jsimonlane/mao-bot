@@ -37,8 +37,6 @@ class ScrewOpponentEffect(Effect):
         activePlayer = game.players[game.activePlayer]
         
         if (len(activePlayer.hand) > 0):
-            print game.players
-            print activePlayer.hand
             targetIndex, unwantedCard = activePlayer.screwOpponent(game.players)
             activePlayer.hand.remove(unwantedCard)
             game.players[targetIndex].hand.append(unwantedCard)
