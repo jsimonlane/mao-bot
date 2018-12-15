@@ -26,7 +26,7 @@ class Agent(Player):
     # # return a (targetIndex, unwantedCard) tuple.
     def screwOpponent(self, playerList):
         # instead of pass, we have a failsafe method
-        self.screwOpponent_(playerList)
+        return self.screwOpponent_(playerList)
 
     # this is how you know if the move you just made is legal or not
     def getFeedback(self, isLegal):
@@ -39,12 +39,12 @@ class Agent(Player):
         targets = []
         for i, player in enumerate(playerList):
             if player.name != self.name:
-                targets.append(player)
+                targets.append(i)
         if (len(targets) == 0):
             print "this really shouldn't happen -- in screw opponent"
             return (0, random.choice(self.hand)) #error checking
         else:
-            return (random.choice(targets), random.choice(self.hand))
+            return random.choice(targets), random.choice(self.hand)
 
 
 class RandomAgent(Agent):
