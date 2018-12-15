@@ -6,10 +6,11 @@ trueState = State(Rule(BASICVALUE, True), Rule(BASICSUIT, "S"), Rule(WILDVALUE, 
 
 class Agent(Player):
     def __init__(self, name):
-        super(Player, self).__init__(name)    
+        super(Player, self).__init__(name)
+        # implied self.hand, inherited from class Player
     
     # return the card from your hand you want to play
-    def chooseCard(self, lastCard):
+    def chooseCard(self, lastCard, aggressive=False):
         pass #DO NOT CHANGE
     
     # notified of an event in the game (a penalty, a success, or a win)
@@ -23,11 +24,18 @@ class Agent(Player):
     # # choose an opponent index and a card to give an opponent
     # # Note: don't remove the card. Just return it. The game will remove it
     # # return a (targetIndex, unwantedCard) tuple.
-    # def screwOpponent(self, otherPlayers):
-    #     pass # let's players give another player one of their cards
-    
-    # put here to avoid copy-paste into all agents. NOTE: Change eventually.
     def screwOpponent(self, playerList):
+        # instead of pass, we have a failsafe method
+        self.screwOpponent_(self, playerList)
+
+    # this is how you know if the move you just made is legal or not
+    def getFeedback(self, isLegal):
+        pass # DO NOT CHANGE
+
+    
+    
+    ## failsafe methods
+    def screwOpponent_(self, playerList):
         targets = []
         for i, player in enumerate(playerList):
             if player.name != self.name:
@@ -38,9 +46,6 @@ class Agent(Player):
         else:
             return (random.choice(targets), random.choice(self.hand))
 
-    # this is how you know if the move you just made is legal or not
-    def getFeedback(self, isLegal):
-        pass # DO NOT CHANGE
 
 class RandomAgent(Agent):
     def __init__(self, name):
