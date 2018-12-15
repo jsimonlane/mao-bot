@@ -19,7 +19,7 @@ class Agent(Player):
     
     # change a rule via the makeModification function, which takes a "rule" tuple as its only argument
     def modifyRule(self, makeModification):
-        pass #DO NOT CHANGE
+        return self.modifyRule_(makeModification)
         
     # # choose an opponent index and a card to give an opponent
     # # Note: don't remove the card. Just return it. The game will remove it
@@ -46,29 +46,7 @@ class Agent(Player):
         else:
             return random.choice(targets), random.choice(self.hand)
 
-
-class RandomAgent(Agent):
-    def __init__(self, name):
-        super(Agent, self).__init__(name)
-        
-        self.wins = 0
-        self.roundLegals = 0
-        self.roundIllegals = 0
-        self.validPercentByRound = []
-                
-    
-    def notify(self, notification, game):
-        def newRound():
-            if self.roundIllegals + self.roundLegals == 0: return #don't divide by 0
-            self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
-            self.roundLegals = 0
-            self.roundIllegals = 0
-            
-        if notification.type == WON: #corresponds to "won"
-            newRound()
-        
-    
-    def modifyRule(self, makeModification):
+    def modifyRule_(self, makeModification):
         ruletype = random.choice([BASICVALUE, WILDVALUE, WILDSUIT, POISONDIST, POISONCARD, SCREWOPPONENT, SKIPPLAYER])
         #
         if ruletype == BASICVALUE:
@@ -94,6 +72,28 @@ class RandomAgent(Agent):
             newValue = random.choice(lst)
             rule = Rule(POISONDIST, newValue)
             makeModification(rule)
+
+
+class RandomAgent(Agent):
+    def __init__(self, name):
+        super(Agent, self).__init__(name)
+        
+        self.wins = 0
+        self.roundLegals = 0
+        self.roundIllegals = 0
+        self.validPercentByRound = []
+                
+    
+    def notify(self, notification, game):
+        def newRound():
+            if self.roundIllegals + self.roundLegals == 0: return #don't divide by 0
+            self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
+            self.roundLegals = 0
+            self.roundIllegals = 0
+            
+        if notification.type == WON: #corresponds to "won"
+            newRound()
+        
 
     
     def chooseCard(self, lastCard):
@@ -228,6 +228,10 @@ class LearningAgent(Agent):
         self.validPercentByRound = []    
         
         self.beliefs = Counter()
+
+        self.skipBelief = None
+        self.screwBelief = None
+        self.poisonBelief = None
         
         for state in stateList:
             self.beliefs[state] = 0
@@ -255,52 +259,38 @@ class LearningAgent(Agent):
             self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
             self.roundLegals = 0
             self.roundIllegals = 0
-        if notification.type == LEGAL:
-            res = True
-        elif notification.type == PENALTY:
-            res = False
-        elif notification.type == WON: #corresponds to "won"
-            newRound()
-            return
-
-        states_agree = []
-        c = Checker()
-        for state in stateList:
-            if c.isConsistent(notification, state) == res:
-                states_agree.append(state)
-
-        for state in stateList:
-            if state in states_agree:
-                self.beliefs[state] += 1.0 / len(states_agree)
-            else:
-                self.beliefs[state] = 0
-
-        self.beliefs.normalize()
-
-    
-    # change a rule via the makeModification function, which takes a "rule" tuple as its only argument
-    def modifyRule(self, makeModification):
-        ruletype = random.choice([BASICVALUE, WILDVALUE, WILDSUIT])
-        #
-        if ruletype == BASICVALUE:
-            newGreater = random.choice([True, False])
-            rule = Rule(BASICVALUE, newGreater)
-            
-            makeModification(rule)
-            
-        elif ruletype == WILDVALUE:
-            lst = [i + 2 for i in range(13)]
-            lst.append(None)
-            newValue = random.choice(lst)
-            rule = Rule(WILDVALUE, newValue)
-            
-            makeModification(rule)
         
-        elif ruletype == WILDSUIT:
-            newSuit = random.choice(["D", "H", "S", "C"])
-            rule = Rule(WILDSUIT, newSuit)
-            
-            makeModification(rule)
+        if notification.type in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+            if notification.type == POISONCARD:
+                self.poisonBelief = notification.attemptedCard
+            elif notification.type == SCREWOPPONENT:
+                self.screwBelief = notification.attemptedCard
+            elif notification.type == SKIPPLAYER:
+                self.skipBelief = notification.attemptedCard
+        else:
+            if notification.type == LEGAL:
+                res = True
+            elif notification.type == PENALTY:
+                res = False
+            elif notification.type == WON: #corresponds to "won"
+                newRound()
+                return
+
+            states_agree = []
+            c = Checker()
+            for state in stateList:
+                # print notification
+                if c.isConsistent(notification, state) == res:
+                    states_agree.append(state)
+
+            for state in stateList:
+                if state in states_agree:
+                    self.beliefs[state] += 1.0 / len(states_agree)
+                else:
+                    self.beliefs[state] = 0
+
+            self.beliefs.normalize()
+
 
     # this is how you know if the move you just made is legal or not
     def getFeedback(self, isLegal):

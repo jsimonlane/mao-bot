@@ -197,7 +197,7 @@ class Game(object):
                 if player.won():
                     if skipEnacted:
                         # go back a player to handle skip special case (ie, don't screw with player order)
-                        self.activePlayer = (self.activePlayer + len(players) - 1) % len(players)
+                        self.activePlayer = (self.activePlayer + len(self.players) - 1) % len(self.players)
                     return WON
                 
                 return 0
@@ -277,11 +277,11 @@ pHuman = RandomAgent("J")
 # pBotw = RandomAgent("A1")
 # pBot2 = RandomAgent("A2")
 # pBot = LearningAgent("Learner2")
-pBot1 = RandomAgent("Learner")
+pBot1 = LearningAgent("Learner")
 
 # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
-g = Game([pHuman, pBot1], False)
-g.playGame(15)
+g = Game([pHuman, pBot1], True)
+g.playGame(25)
 
 #print stats
 for player in g.players:
