@@ -273,7 +273,7 @@ class Game(object):
                 print "round", self.round, t1-t0
 
 # tests
-pHuman = HumanAgent("J")
+pHuman = RandomAgent("J")
 # pBotw = RandomAgent("A1")
 # pBot2 = RandomAgent("A2")
 # pBot = LearningAgent("Learner2")
@@ -281,7 +281,7 @@ pBot1 = RandomAgent("Learner")
 
 # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
 g = Game([pHuman, pBot1], False)
-g.playGame(5)
+g.playGame(15)
 
 #print stats
 for player in g.players:

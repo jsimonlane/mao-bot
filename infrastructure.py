@@ -18,7 +18,7 @@ SCREWOPPONENT = 7
 SKIPPLAYER = 8
 
 
-State = namedtuple('State', ['basicValueRule', 'basicSuitRule', 'wildValueRule', 'wildSuitRule'])
+State = namedtuple('State', ['basicValueRule', 'basicSuitRule', 'wildValueRule', 'wildSuitRule', 'poisonDist'])
 
 #initialize a list of states
 stateList = []
@@ -27,7 +27,8 @@ for basicValue in [True, False]:
     for i in [2,3,4,5,6,7,8,9,10,11,12,13,14, None]:
         for suit in suits:
             for suit2 in suits:
-                stateList.append(State(Rule(BASICVALUE, basicValue), Rule(BASICSUIT, suit), Rule(WILDVALUE, i), Rule(WILDSUIT, suit2) ))
+                for poison in [None, 1, 2]:
+                    stateList.append(State(Rule(BASICVALUE, basicValue), Rule(BASICSUIT, suit), Rule(WILDVALUE, i), Rule(WILDSUIT, suit2), Rule(POISONDIST, poison)))
 
 
 #notification types
@@ -109,6 +110,8 @@ class Checker(object):
             self.wildSuitEffect.modify(setting)
         elif rule == WILDVALUE:
             self.wildValueConstraint.modify(setting)
+        elif rule == POISONDIST:
+            self.poisonDistanceConstraint.modify(setting)
 
     def isLegal(self, attemptedCard):
         """ 

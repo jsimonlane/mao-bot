@@ -2,7 +2,7 @@ from player import *
 import random
 import sys
 
-trueState = State(Rule(BASICVALUE, True), Rule(BASICSUIT, "S"), Rule(WILDVALUE, None), Rule(WILDSUIT, None))
+# trueState = State(Rule(BASICVALUE, True), Rule(BASICSUIT, "S"), Rule(WILDVALUE, None), Rule(WILDSUIT, None))
 
 class Agent(Player):
     def __init__(self, name):
@@ -26,7 +26,7 @@ class Agent(Player):
     # # return a (targetIndex, unwantedCard) tuple.
     def screwOpponent(self, playerList):
         # instead of pass, we have a failsafe method
-        self.screwOpponent_(self, playerList)
+        self.screwOpponent_(playerList)
 
     # this is how you know if the move you just made is legal or not
     def getFeedback(self, isLegal):
@@ -40,7 +40,7 @@ class Agent(Player):
         for i, player in enumerate(playerList):
             if player.name != self.name:
                 targets.append(player)
-        if (targets.empty()):
+        if (len(targets) == 0):
             print "this really shouldn't happen -- in screw opponent"
             return (0, random.choice(self.hand)) #error checking
         else:
@@ -55,17 +55,6 @@ class RandomAgent(Agent):
         self.roundLegals = 0
         self.roundIllegals = 0
         self.validPercentByRound = []
-        
-    def screwOpponent(self, playerList):
-        targets = []
-        for i, player in enumerate(playerList):
-            if player.name != self.name:
-                targets.append(player)
-        if (targets.empty()):
-            print "this really shouldn't happen -- in screw opponent"
-            return (0, random.choice(self.hand)) #error checking
-        else:
-            return (random.choice(targets), random.choice(self.hand))
                 
     
     def notify(self, notification, game):
@@ -80,27 +69,32 @@ class RandomAgent(Agent):
         
     
     def modifyRule(self, makeModification):
-        ruletype = random.choice([BASICVALUE, WILDVALUE, WILDSUIT])
+        ruletype = random.choice([BASICVALUE, WILDVALUE, WILDSUIT, POISONDIST, POISONCARD, SCREWOPPONENT, SKIPPLAYER])
         #
         if ruletype == BASICVALUE:
             newGreater = random.choice([True, False])
             rule = Rule(BASICVALUE, newGreater)
-            
             makeModification(rule)
             
-        elif ruletype == WILDVALUE:
+        elif ruletype == WILDVALUE or ruletype == POISONCARD or ruletype == SCREWOPPONENT or ruletype == SKIPPLAYER:
             lst = [i + 2 for i in range(13)]
             lst.append(None)
             newValue = random.choice(lst)
-            rule = Rule(WILDVALUE, newValue)
-            
+            rule = Rule(ruletype, newValue)
             makeModification(rule)
         
         elif ruletype == WILDSUIT:
             newSuit = random.choice(["D", "H", "S", "C", None])
             rule = Rule(WILDSUIT, newSuit)
-            
             makeModification(rule)
+
+        elif ruletype == POISONDIST:
+            lst = [1,2]
+            lst.append(None)
+            newValue = random.choice(lst)
+            rule = Rule(POISONDIST, newValue)
+            makeModification(rule)
+
     
     def chooseCard(self, lastCard):
         return self.hand[0]
