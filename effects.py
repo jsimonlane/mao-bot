@@ -47,7 +47,7 @@ class ScrewOpponentEffect(Effect):
     
     def modify(self, newActivatingValue):
         if newActivatingValue == None or (newActivatingValue >= 2 and newActivatingValue <= 14):
-            self.activatingValue = self.newActivatingValue
+            self.activatingValue = newActivatingValue
         else:
             print "invalid activating value for ScrewOpponent"
 
@@ -69,7 +69,7 @@ class SkipPlayerEffect(Effect):
     
     def modify(self, newActivatingValue):
         if newActivatingValue == None or (newActivatingValue >= 2 and newActivatingValue <= 14):
-            self.activatingValue = self.newActivatingValue
+            self.activatingValue = newActivatingValue
         else:
             print "invalid activating value for SkipPlayer"
 

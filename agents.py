@@ -156,8 +156,7 @@ class HumanAgent(Agent):
                 return None
             else:
                 print "invalid -- try again"
-                
-        while True:
+        try:
             print "congrats, you get to change a rule! Please be precise"
             print "type the rule you want to change:"
             print "  1 for basicValue\n  3 for WildValue\n  4 for WildSuit \n  5 for PoisonDist"
@@ -213,6 +212,10 @@ class HumanAgent(Agent):
             elif rule == POISONCARD or rule == SKIPPLAYER or rule == SCREWOPPONENT:
                 value = getActiveValue() #returns a value between 2-14 or None
                 makeModification(Rule(rule, value))
+                return
+        except:
+            print "invalid input -- continuing unchanged"
+            return
         
     def notify(self, notification, game):
         pass
