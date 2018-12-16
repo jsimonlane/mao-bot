@@ -49,6 +49,7 @@ class Agent(Player):
     def modifyRule_(self, makeModification):
         ruletype = random.choice([BASICVALUE, WILDVALUE, WILDSUIT, POISONDIST, POISONCARD, SCREWOPPONENT, SKIPPLAYER])
         #
+        rule = None
         if ruletype == BASICVALUE:
             newGreater = random.choice([True, False])
             rule = Rule(BASICVALUE, newGreater)
@@ -303,19 +304,30 @@ class HmmAgent(Agent):
     def __init__(self, name):
         super(Agent, self).__init__(name)
         self.checker = Checker()
-        self.beliefDistrib = Counter()
+        
+        self.inDangerOfSettingToNone = {}
+        self.believedEffectValues = {}
+        for t in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+            self.believedEffectValues[t] = None
+            self.inDangerOfSettingToNone[t] = False
         
         self.roundIllegals = 0
         self.roundLegals = 0
         self.validPercentByRound = []
         
         # initialize list of states
+        self.beliefDistrib = Counter()
         initProb = 1 / float(len(stateList))
         for s in stateList:
             self.beliefDistrib[s] = initProb
     
+    
+    def getBelievedEffectValue(self, effect):
+        return self.believedEffectValues[effect]
+
+
     # return the card from your hand you want to play
-    def chooseCard(self, lastCard):
+    def chooseCard(self, lastCard):    
         belief_state = self.beliefDistrib.argMax() 
         legal_cards = []
         for index, card in enumerate(self.hand):
@@ -328,6 +340,8 @@ class HmmAgent(Agent):
         else: 
             return random.choice(self.hand)
             
+            
+            
     def getFeedback(self, isLegal):
         if isLegal:
             self.roundLegals += 1
@@ -336,16 +350,28 @@ class HmmAgent(Agent):
     
     # notified of an event in the game (a penalty, a success, or a win)
     def notify(self, notification, game):
-        
+        type = notification.type    
+        ## IMPORTANT: Changing probabilities during the round!
         if notification.type == WON:
+            try:
+                self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
+            except:
+                print "div by 0"
+            self.roundLegals = 0
+            self.roundIllegals = 0
+            
+            #reset 
+            for t in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+                self.inDangerOfSettingToNone[t] = False
+            
+            
+            
+            
             # simulate dynamics -- occurs only on new round change
             #naive dynamics: reset the list
             # uniformProb = 1.0 / float(len(stateList))
             # for state in stateList:
             #     self.beliefDistrib[state] = uniformProb # naive
-            self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
-            self.roundLegals = 0
-            self.roundIllegals = 0
             # return
         
             #complex dynamics:
@@ -387,10 +413,26 @@ class HmmAgent(Agent):
             
                     
                     
-            
+        # here
+        elif type in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+            self.believedEffectValues[type] = notification.attemptedCard.value
+            self.inDangerOfSettingToNone[type] = False
+        # type = legal or penalty
         else:
+            
             if notification.type == LEGAL:
                 res = True
+                
+                #setting up prior condition (before effect is made)
+                for t in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+                    # if we haven't received a notification when we were expecting it, set a notification to None
+                    if self.inDangerOfSettingToNone[t]:
+                        self.believedEffectValues[t] = None
+                    
+                    # set up the expectation of an effect notification 
+                    v = self.believedEffectValues[t]
+                    if v == notification.attemptedCard.value:
+                        self.inDangerOfSettingToNone[t] = True
             elif notification.type == PENALTY:
                 res = False
             else:
@@ -406,3 +448,4 @@ class HmmAgent(Agent):
                         self.beliefDistrib[state] = 0
             self.beliefDistrib.normalize()
             return
+            

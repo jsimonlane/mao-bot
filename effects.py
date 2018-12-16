@@ -26,7 +26,7 @@ class Effect(object):
     
 class ScrewOpponentEffect(Effect):
     def __init__(self):
-        self.activatingValue = None #should be a value in [2,14], or None
+        self.activatingValue = 10 #should be a value in [2,14], or None
         
     def isActive(self, attemptedCard):
         return attemptedCard.value == self.activatingValue
@@ -55,7 +55,7 @@ class ScrewOpponentEffect(Effect):
 # SERIOUSLY SKETCHED OUT BY activePlayer INCREMENTING -- implement last
 class SkipPlayerEffect(Effect):
     def __init__(self):
-        self.activatingValue = None #should be a value in [2,14], or None
+        self.activatingValue = 11 #should be a value in [2,14], or None
         
     def isActive(self, attemptedCard):
         return attemptedCard.value == self.activatingValue
@@ -81,7 +81,7 @@ class PoisonCardEffect(Effect):
     Playing this card, esp when it's illegal, means you're getting hammered
     """
     def __init__(self):
-        self.value = None # can be [2,14], or None
+        self.value = 12 # can be [2,14], or None
     
     def isActive(self, attemptedCard):
         return attemptedCard.value == self.value
@@ -97,7 +97,7 @@ class PoisonCardEffect(Effect):
     
     def modify(self, dist):
         if (dist >= 2 or dist <= 14) or dist == None:
-            self.dist = dist
+            self.value = dist
         else:
             print "invalid setting for rule PoisonCardConstraint"
 
