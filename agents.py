@@ -338,6 +338,8 @@ class HmmAgent(Agent):
     def notify(self, notification, game):
         
         if notification.type == WON:
+            if notification.attemptedCard == self:
+                return
             # simulate dynamics -- occurs only on new round change
             #naive dynamics: reset the list
             # uniformProb = 1.0 / float(len(stateList))
@@ -370,7 +372,7 @@ class HmmAgent(Agent):
             for state in stateList:
                 if self.beliefDistrib[state] != 0:
                     possiblePriorStates.append(state)
-            
+
             newBeliefs = Counter()
             
             
@@ -383,10 +385,7 @@ class HmmAgent(Agent):
             
             newBeliefs.normalize()
             self.beliefDistrib = newBeliefs
-            return
-            
-                    
-                    
+            return        
             
         else:
             if notification.type == LEGAL:
@@ -406,3 +405,67 @@ class HmmAgent(Agent):
                         self.beliefDistrib[state] = 0
             self.beliefDistrib.normalize()
             return
+
+    def modifyRule(self, makeModification):
+
+        ruletype = random.choice([BASICVALUE, WILDVALUE, WILDSUIT, POISONDIST, POISONCARD, SCREWOPPONENT, SKIPPLAYER])
+        #
+        if ruletype == BASICVALUE:
+            newGreater = random.choice([True, False])
+            rule = Rule(BASICVALUE, newGreater)
+            makeModification(rule)
+            
+        elif ruletype == WILDVALUE or ruletype == POISONCARD or ruletype == SCREWOPPONENT or ruletype == SKIPPLAYER:
+            lst = [i + 2 for i in range(13)]
+            lst.append(None)
+            newValue = random.choice(lst)
+            rule = Rule(ruletype, newValue)
+            makeModification(rule)
+        
+        elif ruletype == WILDSUIT:
+            newSuit = random.choice(["D", "H", "S", "C", None])
+            rule = Rule(WILDSUIT, newSuit)
+            makeModification(rule)
+
+        elif ruletype == POISONDIST:
+            lst = [1,2]
+            lst.append(None)
+            newValue = random.choice(lst)
+            rule = Rule(POISONDIST, newValue)
+            makeModification(rule)
+
+        newBeliefs = Counter()
+        
+        if rule.rule == BASICVALUE: 
+            for state in self.beliefDistrib:
+                state_val = self.beliefDistrib[state]
+                new_state = State(rule, state.wildValueRule, state.wildSuitRule, state.poisonDistRule)
+                newBeliefs[new_state] += state_val  
+        
+        elif rule.rule == WILDSUIT:
+            for state in self.beliefDistrib:
+                state_val = self.beliefDistrib[state]
+                new_state = State(state.basicValueRule, state.wildValueRule, rule, state.poisonDistRule)
+                newBeliefs[new_state] += state_val 
+        
+        elif rule.rule == POISONDIST:
+            for state in self.beliefDistrib:
+                state_val = self.beliefDistrib[state]
+                new_state = State(state.basicValueRule, state.wildValueRule, state.wildSuitRule, rule)
+                newBeliefs[new_state] += state_val 
+        
+        elif rule.rule == WILDVALUE:
+            for state in self.beliefDistrib:
+                state_val = self.beliefDistrib[state]
+                new_state = State(state.basicValueRule, rule, state.wildSuitRule, state.poisonDistRule)
+                newBeliefs[new_state] += state_val 
+
+        else:
+            ### TODO #### Account for effect card distributions
+            return
+
+        newBeliefs.normalize()
+        self.beliefDistrib = newBeliefs
+
+
+
