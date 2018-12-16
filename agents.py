@@ -307,6 +307,13 @@ class HmmAgent(Agent):
         self.checker = Checker()
         self.beliefDistrib = Counter()
         
+        self.inDangerOfSettingToNone = {}
+        self.believedEffectValues = {}
+        for t in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+            self.believedEffectValues[t] = None
+            self.inDangerOfSettingToNone[t] = False
+            
+        
         self.roundIllegals = 0
         self.roundLegals = 0
         self.validPercentByRound = []
@@ -315,6 +322,17 @@ class HmmAgent(Agent):
         initProb = 1 / float(len(stateList))
         for s in stateList:
             self.beliefDistrib[s] = initProb
+    
+    def getCombinedState(self):
+        state = self.beliefDistrib.argMax()
+        poison = Rule(POISONCARD, self.getBelievedEffectValue(POISONCARD))
+        screw = Rule(SCREWOPPONENT, self.getBelievedEffectValue(SCREWOPPONENT))
+        skip = Rule(SKIPPLAYER, self.getBelievedEffectValue(SKIPPLAYER))
+        effectState = EffectState(poison, screw, skip)
+        return CombinedState(state, effectState)
+            
+    def getBelievedEffectValue(self, effect):
+        return self.believedEffectValues[effect]
     
     # return the card from your hand you want to play
     def chooseCard(self, lastCard):
@@ -338,18 +356,29 @@ class HmmAgent(Agent):
     
     # notified of an event in the game (a penalty, a success, or a win)
     def notify(self, notification, game):
-        
         if notification.type == WON:
-            if notification.attemptedCard == self:
+            try:
+                self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
+            except:
+                print "div by 0"
+            self.roundLegals = 0
+            self.roundIllegals = 0
+            
+            #reset 
+            for t in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+                self.inDangerOfSettingToNone[t] = False
+
+            ## super wacky -- we need know if we won the game, so we put "player" as "attemptedCard"
+            # immutable names is mostly great. Except when it isn't
+            if notification.attemptedCard == self: 
                 return
+                
+                
             # simulate dynamics -- occurs only on new round change
             #naive dynamics: reset the list
             # uniformProb = 1.0 / float(len(stateList))
             # for state in stateList:
             #     self.beliefDistrib[state] = uniformProb # naive
-            self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
-            self.roundLegals = 0
-            self.roundIllegals = 0
             # return
         
             #complex dynamics:
@@ -387,11 +416,31 @@ class HmmAgent(Agent):
             
             newBeliefs.normalize()
             self.beliefDistrib = newBeliefs
-            return        
+            return   
+            
+            
+        elif notification.type in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+            type = notification.type
+            # print "setting value of ", type
+            self.believedEffectValues[type] = notification.attemptedCard.value
+            self.inDangerOfSettingToNone[type] = False     
             
         elif notification.type in [LEGAL, PENALTY]:
             if notification.type == LEGAL:
                 res = True
+                
+                for t in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+                    # if we haven't received a notification when we were expecting it, set a notification to None
+                    if self.inDangerOfSettingToNone[t]:
+                        # print "dismayed", t
+                        self.believedEffectValues[t] = None
+                    
+                    # set up the expectation of an effect notification 
+                    v = self.believedEffectValues[t]
+                    if v == notification.attemptedCard.value:
+                        # print "we expect a notification", t
+                        self.inDangerOfSettingToNone[t] = True
+                        
             elif notification.type == PENALTY:
                 res = False
             # update probabilities based on state dynamics
@@ -461,10 +510,17 @@ class HmmAgent(Agent):
                 new_state = State(state.basicValueRule, rule, state.wildSuitRule, state.poisonDistRule)
                 newBeliefs[new_state] += state_val 
 
+        elif rule.rule in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+            ### TODO #### Account for effect card distributions
+            # print rule.rule
+            self.believedEffectValues[rule.rule] = rule.setting
+            return
+
         else:
             ### TODO #### Account for effect card distributions
             return
 
+        # NONETYPE -- possible error here, need to return
         newBeliefs.normalize()
         self.beliefDistrib = newBeliefs
 
@@ -546,16 +602,5 @@ class cardCounter(HmmAgent):
             return (0, random.choice(self.hand)) #error checking
         else:
             return random.choice(targets), random.choice(self.hand)
-
-
-
-
-
-
-
-
-
-
-
 
 
