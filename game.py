@@ -8,7 +8,7 @@ import time
 import copy
 from agents import *    
 
-TESTCARD = Card(value=13, suit="C")
+TESTCARD = Card(value=7, suit="C")
 class Game(object):
     def __init__(self, players, autogame = True):
         
@@ -41,7 +41,7 @@ class Game(object):
         self.gameHistory = GameHistory() # records the history of the game for training data
         self.roundHistory = RoundHistory()
 
-        self.heuristicMode = True
+        self.heuristicMode = False
         self.testCard = TESTCARD 
         
     def makeModification(self, ruleTuple):
@@ -145,31 +145,6 @@ class Game(object):
         else:
             return card
     
-    def HeursiticCardFromDeck(self):
-        #  when this is run to build heuristic vals, 10% chance of test card
-        if self.heuristicMode:
-            if random.random() < float(0.10):
-                card = self.testCard
-            else:
-                card = self.deck.drawCard()
-
-        # for durability, reset the deck
-        if (card == None):
-            assert (len(self.deck.cards) == 0)
-            if (len(self.pile) == 0):
-                #sheesh. literally all the cards have been played
-                return None
-            else:
-                # NOTE: THESE ARE UNTESTED!!! WATCH OUT FOR THIS SECTION!
-                # make a new deck using the pile
-                origLen = len(self.pile) # for assert
-                self.deck.cards = copy.copy(self.pile) #preserves references I think
-                self.pile = []
-                assert( origLen == len(self.deck.cards) ) #copying trips me out
-                self.deck.shuffle()
-                return self.getCardFromDeck() #recurse, try to get another card
-        else:
-            return card
             
     def enactEffects(self, attemptedCard):
         """
@@ -227,17 +202,14 @@ class Game(object):
                 if player.won():
                     if skipEnacted:
                         # go back a player to handle skip special case (ie, don't screw with player order)
-                        self.activePlayer = (self.activePlayer + len(players) - 1) % len(players)
+                        self.activePlayer = (self.activePlayer + len(self.players) - 1) % len(self.players)
                     return WON
                 
                 return 0
         else:
             # return the card to the player, and penalize them with a new card
             player.takeCard(attemptedCard)
-            if player.name == "HeuristicTests":
-                penaltyCard = self.HeursiticCardFromDeck()
-            else:
-                penaltyCard = self.getCardFromDeck()
+            penaltyCard = self.getCardFromDeck()
             if penaltyCard:
                 player.takeCard(penaltyCard)
                 
@@ -268,7 +240,13 @@ class Game(object):
             
             for player in self.players:
                 # draw 5 cards
-                player.hand = [self.getCardFromDeck() for i in range(self.startingHandSize)]
+                if player.name == "HeuristicTests":
+                    player.hand = [self.getCardFromDeck() for i in range(self.startingHandSize - 1)]
+                    foo = player.hand
+                    foo.append(TESTCARD)
+                    player.hand = foo
+                else:
+                    player.hand = [self.getCardFromDeck() for i in range(self.startingHandSize)]
                 
                 
         initNewRound(prevWinner)
@@ -306,15 +284,15 @@ class Game(object):
                 print "round", self.round, t1-t0
 
 # tests
-pHuman = RandomAgent("Learner")
+pHuman = HmmAgent("Learner")
 # pBotw = RandomAgent("A1")
 # pBot2 = RandomAgent("A2")
 # pBot = LearningAgent("Learner2")
-pBot1 = RandomAgent("HeuristicTests")
+pBot1 = HeuristicAgent("NaiveTests")
 
 # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
 g = Game([pHuman, pBot1], True)
-g.playGame(1000)
+g.playGame(100)
 
 #print stats
 for player in g.players:
