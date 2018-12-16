@@ -443,5 +443,4 @@ class HmmAgent(Agent):
             self.beliefDistrib.normalize()
             return
         else:
-            print "unknown notification"
             return

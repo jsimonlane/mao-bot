@@ -284,7 +284,7 @@ pBot1 = HmmAgent("Learner")
 # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
 g = Game([pHuman, pBot1], True)
 
-g.playGame(10)
+g.playGame(100)
 
 
 #print stats
