@@ -8,7 +8,7 @@ import time
 import copy
 from agents import *    
 
-TESTCARD = Card(value=7, suit="C")
+
 class Game(object):
     def __init__(self, players, autogame = True, TESTCARD = None):
         
