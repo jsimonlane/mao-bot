@@ -268,7 +268,7 @@ class LearningAgent(Agent):
                 self.screwBelief = notification.attemptedCard.value
             elif notification.type == SKIPPLAYER:
                 self.skipBelief = notification.attemptedCard.value
-        else:
+        elif notification.type in [LEGAL, PENALTY, WON]:
             if notification.type == LEGAL:
                 res = True
             elif notification.type == PENALTY:
@@ -291,6 +291,8 @@ class LearningAgent(Agent):
                     self.beliefs[state] = 0
 
             self.beliefs.normalize()
+        else:
+            return
 
 
     # this is how you know if the move you just made is legal or not
@@ -366,7 +368,11 @@ class HmmAgent(Agent):
             
             
             
-            
+            ## super wacky -- we need know if we won the game, so we put "player" as "attemptedCard"
+            # immutable names is mostly great. Except when it isn't
+            if notification.attemptedCard == self: 
+                return
+
             # simulate dynamics -- occurs only on new round change
             #naive dynamics: reset the list
             # uniformProb = 1.0 / float(len(stateList))
@@ -396,7 +402,7 @@ class HmmAgent(Agent):
             for state in stateList:
                 if self.beliefDistrib[state] != 0:
                     possiblePriorStates.append(state)
-            
+
             newBeliefs = Counter()
             
             
@@ -418,8 +424,8 @@ class HmmAgent(Agent):
             self.believedEffectValues[type] = notification.attemptedCard.value
             self.inDangerOfSettingToNone[type] = False
         # type = legal or penalty
-        else:
-            
+
+        elif notification.type in [LEGAL, PENALTY]:
             if notification.type == LEGAL:
                 res = True
                 
@@ -435,8 +441,6 @@ class HmmAgent(Agent):
                         self.inDangerOfSettingToNone[t] = True
             elif notification.type == PENALTY:
                 res = False
-            else:
-                return
             # update probabilities based on state dynamics
             for state in stateList: #same thing as belief distribution
                 if self.beliefDistrib[state] == 0:
@@ -448,4 +452,86 @@ class HmmAgent(Agent):
                         self.beliefDistrib[state] = 0
             self.beliefDistrib.normalize()
             return
+        else:
+            print "unknown notification"
+            return
+
+        
+
+    def modifyRule(self, makeModification):
+
+        ruletype = random.choice([BASICVALUE, WILDVALUE, WILDSUIT, POISONDIST, POISONCARD, SCREWOPPONENT, SKIPPLAYER])
+        #
+        rule = None
+        if ruletype == BASICVALUE:
+            newGreater = random.choice([True, False])
+            rule = Rule(BASICVALUE, newGreater)
             
+        elif ruletype == WILDVALUE or ruletype == POISONCARD or ruletype == SCREWOPPONENT or ruletype == SKIPPLAYER:
+            lst = [i + 2 for i in range(13)]
+            lst.append(None)
+            newValue = random.choice(lst)
+            rule = Rule(ruletype, newValue)
+        
+        elif ruletype == WILDSUIT:
+            newSuit = random.choice(["D", "H", "S", "C", None])
+            rule = Rule(WILDSUIT, newSuit)
+
+        elif ruletype == POISONDIST:
+            lst = [1,2]
+            lst.append(None)
+            newValue = random.choice(lst)
+            rule = Rule(POISONDIST, newValue)
+        
+        if rule == None:
+            print "rule assignment error"
+            return
+        
+        makeModification(rule)
+
+        newBeliefs = Counter()
+        
+        if rule.rule == BASICVALUE: 
+            for state in self.beliefDistrib:
+                state_val = self.beliefDistrib[state]
+                new_state = State(rule, state.wildValueRule, state.wildSuitRule, state.poisonDistRule)
+                newBeliefs[new_state] += state_val  
+        
+        elif rule.rule == WILDSUIT:
+            for state in self.beliefDistrib:
+                state_val = self.beliefDistrib[state]
+                new_state = State(state.basicValueRule, state.wildValueRule, rule, state.poisonDistRule)
+                newBeliefs[new_state] += state_val 
+        
+        elif rule.rule == POISONDIST:
+            for state in self.beliefDistrib:
+                state_val = self.beliefDistrib[state]
+                new_state = State(state.basicValueRule, state.wildValueRule, state.wildSuitRule, rule)
+                newBeliefs[new_state] += state_val 
+        
+        elif rule.rule == WILDVALUE:
+            for state in self.beliefDistrib:
+                state_val = self.beliefDistrib[state]
+                new_state = State(state.basicValueRule, rule, state.wildSuitRule, state.poisonDistRule)
+                newBeliefs[new_state] += state_val 
+
+        elif rule.rule in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+            ### TODO #### Account for effect card distributions
+            self.believedEffectValues[rule.rule] = rule.setting
+
+        newBeliefs.normalize()
+        self.beliefDistrib = newBeliefs
+
+
+# Card Counting Agent that plays expectimax type solution
+class cardCounter(HmmAgent):
+    def __init__(self, name):
+        super(HmmAgent, self).__init__(name)
+        
+        self.cardBelief = Counter()
+        for s in ["D", "H", "S", "C"]:
+            for v in range(2,15):
+                self.cardBelief[Card(v,s)] = 0
+
+    def notify(self, notification, game):
+        super(HmmAgent, self).notify(notification, game)

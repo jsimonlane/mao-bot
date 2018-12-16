@@ -31,6 +31,7 @@ class Game(object):
         #deck stuff
         self.startingHandSize = 7
         self.changeRuleRate = 1 #invariant -- DO NOT CHANGE
+
         self.deck = Deck() #pre-shuffled deck
         self.pile = [] # a list of discarded cards. DIFFERENT FROM DECK OBJECT. 
         self.lastCard = None
@@ -245,8 +246,7 @@ class Game(object):
             player = self.players[self.activePlayer]
             result = self.playerTurn(player)
             if result == WON:
-                
-                notification = Notification(WON, player, None) #so wacky
+                notification = Notification(WON, player, None) #hacky notification
                 self.notifyAll(notification)
                 break
             else:
@@ -283,7 +283,9 @@ pBot1 = HmmAgent("Learner")
 
 # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
 g = Game([pHuman, pBot1], True)
-g.playGame(50)
+
+g.playGame(10)
+
 
 #print stats
 for player in g.players:
