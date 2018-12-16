@@ -474,13 +474,77 @@ class cardCounter(HmmAgent):
     def __init__(self, name):
         super(HmmAgent, self).__init__(name)
         
-        self.cardBelief = Counter()
+        self.discard = []
+        self.cardsAtLarge = []
+        self.opHandSize = len(self.hand)
+        self.cardBelief = {}
+        
         for s in ["D", "H", "S", "C"]:
             for v in range(2,15):
-                self.cardBelief[Card(v,s)] = 0
+                if Card(v,s) not in self.hand:
+                    self.cardsAtLarge.append(Card(v,s))
+
+        for card in self.cardsAtLarge: 
+            self.cardBelief[card] = self.opHandSize/len(self.cardsAtLarge)
+        for card in self.hand:
+            self.cardBelief[card] = 0
+
 
     def notify(self, notification, game):
         super(HmmAgent, self).notify(notification, game)
+
+        # If opponent just played
+        if notification.type in [LEGAL, PENALTY, POISONCARD]:
+            cardPlayed = notification.attemptedCard
+            
+            # Size of opponent hands combined
+            self.opHandSize = 0
+            for player in game.players:
+                if player != self:
+                    self.opHandSize += len(player.hand)
+
+            # if legal move played, card no longer in hand
+            if notification.type == LEGAL:
+                self.discard.append(cardPlayed)
+                self.cardsAtLarge.remove(cardPlayed)
+                self.cardBelief[cardPlayed] = 0
+
+
+            
+            # if penalty, card returned to op hand 
+            elif notification.type == PENALTY:
+                self.cardBelief[cardPlayed] = 1
+
+            spotsAtLarge = self.opHandSize
+            for card in self.cardBelief:
+                if self.cardBelief[card] > 0.99:
+                    spotsAtLarge -= 1
+            for card in self.cardsAtLarge:
+                self.cardBelief[card] = spotsAtLarge / len(self.cardsAtLarge) 
+        # Need Case if you just played
+
+        
+
+
+    def screwOpponent(self, playerList):
+        targets = []
+        for i, player in enumerate(playerList):
+            if player.name != self.name:
+                targets.append(i)
+        if (len(targets) == 0):
+            print "this really shouldn't happen -- in screw opponent"
+
+            return (0, random.choice(self.hand)) #error checking
+        else:
+            return random.choice(targets), random.choice(self.hand)
+
+
+
+
+
+
+
+
 
 
 

@@ -17,6 +17,7 @@ POISONCARD = 6
 SCREWOPPONENT = 7
 SKIPPLAYER = 8
 
+DECKRESET = 10
 
 State = namedtuple('State', ['basicValueRule', 'wildValueRule', 'wildSuitRule', 'poisonDistRule'])
 
