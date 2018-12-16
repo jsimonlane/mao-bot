@@ -267,7 +267,7 @@ class LearningAgent(Agent):
                 self.screwBelief = notification.attemptedCard.value
             elif notification.type == SKIPPLAYER:
                 self.skipBelief = notification.attemptedCard.value
-        else:
+        elif notification.type in [LEGAL, PENALTY, WON]:
             if notification.type == LEGAL:
                 res = True
             elif notification.type == PENALTY:
@@ -290,6 +290,8 @@ class LearningAgent(Agent):
                     self.beliefs[state] = 0
 
             self.beliefs.normalize()
+        else:
+            return
 
 
     # this is how you know if the move you just made is legal or not
@@ -387,13 +389,11 @@ class HmmAgent(Agent):
             self.beliefDistrib = newBeliefs
             return        
             
-        else:
+        elif notification.type in [LEGAL, PENALTY]:
             if notification.type == LEGAL:
                 res = True
             elif notification.type == PENALTY:
                 res = False
-            else:
-                return
             # update probabilities based on state dynamics
             for state in stateList: #same thing as belief distribution
                 if self.beliefDistrib[state] == 0:
@@ -405,6 +405,7 @@ class HmmAgent(Agent):
                         self.beliefDistrib[state] = 0
             self.beliefDistrib.normalize()
             return
+        
 
     def modifyRule(self, makeModification):
 
@@ -466,6 +467,22 @@ class HmmAgent(Agent):
 
         newBeliefs.normalize()
         self.beliefDistrib = newBeliefs
+
+
+# Card Counting Agent that plays expectimax type solution
+class cardCounter(HmmAgent):
+    def __init__(self, name):
+        super(HmmAgent, self).__init__(name)
+        
+        self.cardBelief = Counter()
+        for s in ["D", "H", "S", "C"]:
+            for v in range(2,15):
+                self.cardBelief[Card(v,s)] = 0
+
+    def notify(self, notification, game):
+        super(HmmAgent, self).notify(notification, game)
+
+
 
 
 
