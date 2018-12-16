@@ -415,16 +415,6 @@ class HmmAgent(Agent):
             
             newBeliefs.normalize()
             self.beliefDistrib = newBeliefs
-            return
-            
-                    
-                    
-        # here
-        elif type in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
-            self.believedEffectValues[type] = notification.attemptedCard.value
-            self.inDangerOfSettingToNone[type] = False
-        # type = legal or penalty
-
         elif notification.type in [LEGAL, PENALTY]:
             if notification.type == LEGAL:
                 res = True
@@ -455,83 +445,3 @@ class HmmAgent(Agent):
         else:
             print "unknown notification"
             return
-
-        
-
-    def modifyRule(self, makeModification):
-
-        ruletype = random.choice([BASICVALUE, WILDVALUE, WILDSUIT, POISONDIST, POISONCARD, SCREWOPPONENT, SKIPPLAYER])
-        #
-        rule = None
-        if ruletype == BASICVALUE:
-            newGreater = random.choice([True, False])
-            rule = Rule(BASICVALUE, newGreater)
-            
-        elif ruletype == WILDVALUE or ruletype == POISONCARD or ruletype == SCREWOPPONENT or ruletype == SKIPPLAYER:
-            lst = [i + 2 for i in range(13)]
-            lst.append(None)
-            newValue = random.choice(lst)
-            rule = Rule(ruletype, newValue)
-        
-        elif ruletype == WILDSUIT:
-            newSuit = random.choice(["D", "H", "S", "C", None])
-            rule = Rule(WILDSUIT, newSuit)
-
-        elif ruletype == POISONDIST:
-            lst = [1,2]
-            lst.append(None)
-            newValue = random.choice(lst)
-            rule = Rule(POISONDIST, newValue)
-        
-        if rule == None:
-            print "rule assignment error"
-            return
-        
-        makeModification(rule)
-
-        newBeliefs = Counter()
-        
-        if rule.rule == BASICVALUE: 
-            for state in self.beliefDistrib:
-                state_val = self.beliefDistrib[state]
-                new_state = State(rule, state.wildValueRule, state.wildSuitRule, state.poisonDistRule)
-                newBeliefs[new_state] += state_val  
-        
-        elif rule.rule == WILDSUIT:
-            for state in self.beliefDistrib:
-                state_val = self.beliefDistrib[state]
-                new_state = State(state.basicValueRule, state.wildValueRule, rule, state.poisonDistRule)
-                newBeliefs[new_state] += state_val 
-        
-        elif rule.rule == POISONDIST:
-            for state in self.beliefDistrib:
-                state_val = self.beliefDistrib[state]
-                new_state = State(state.basicValueRule, state.wildValueRule, state.wildSuitRule, rule)
-                newBeliefs[new_state] += state_val 
-        
-        elif rule.rule == WILDVALUE:
-            for state in self.beliefDistrib:
-                state_val = self.beliefDistrib[state]
-                new_state = State(state.basicValueRule, rule, state.wildSuitRule, state.poisonDistRule)
-                newBeliefs[new_state] += state_val 
-
-        elif rule.rule in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
-            ### TODO #### Account for effect card distributions
-            self.believedEffectValues[rule.rule] = rule.setting
-
-        newBeliefs.normalize()
-        self.beliefDistrib = newBeliefs
-
-
-# Card Counting Agent that plays expectimax type solution
-class cardCounter(HmmAgent):
-    def __init__(self, name):
-        super(HmmAgent, self).__init__(name)
-        
-        self.cardBelief = Counter()
-        for s in ["D", "H", "S", "C"]:
-            for v in range(2,15):
-                self.cardBelief[Card(v,s)] = 0
-
-    def notify(self, notification, game):
-        super(HmmAgent, self).notify(notification, game)
