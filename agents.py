@@ -262,11 +262,11 @@ class LearningAgent(Agent):
         
         if notification.type in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
             if notification.type == POISONCARD:
-                self.poisonBelief = notification.attemptedCard
+                self.poisonBelief = notification.attemptedCard.value
             elif notification.type == SCREWOPPONENT:
-                self.screwBelief = notification.attemptedCard
+                self.screwBelief = notification.attemptedCard.value
             elif notification.type == SKIPPLAYER:
-                self.skipBelief = notification.attemptedCard
+                self.skipBelief = notification.attemptedCard.value
         else:
             if notification.type == LEGAL:
                 res = True
@@ -358,6 +358,8 @@ class HmmAgent(Agent):
                 res = True
             elif notification.type == PENALTY:
                 res = False
+            else:
+                return
             # update probabilities based on state dynamics
             for state in stateList: #same thing as belief distribution
                 if self.beliefDistrib[state] == 0:

@@ -18,17 +18,16 @@ SCREWOPPONENT = 7
 SKIPPLAYER = 8
 
 
-State = namedtuple('State', ['basicValueRule', 'basicSuitRule', 'wildValueRule', 'wildSuitRule', 'poisonDist'])
+State = namedtuple('State', ['basicValueRule', 'wildValueRule', 'wildSuitRule', 'poisonDist'])
 
 #initialize a list of states
 stateList = []
 suits = ['H', 'D', 'C', 'S', None]
 for basicValue in [True, False]:
     for i in [2,3,4,5,6,7,8,9,10,11,12,13,14, None]:
-        for suit in suits:
-            for suit2 in suits:
-                for poison in [None, 1, 2]:
-                    stateList.append(State(Rule(BASICVALUE, basicValue), Rule(BASICSUIT, suit), Rule(WILDVALUE, i), Rule(WILDSUIT, suit2), Rule(POISONDIST, poison)))
+        for suit2 in suits:
+            for poison in [None, 1, 2]:
+                stateList.append(State(Rule(BASICVALUE, basicValue), Rule(WILDVALUE, i), Rule(WILDSUIT, suit2), Rule(POISONDIST, poison)))
 
 
 #notification types
