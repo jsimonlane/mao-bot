@@ -322,6 +322,14 @@ class HmmAgent(Agent):
         initProb = 1 / float(len(stateList))
         for s in stateList:
             self.beliefDistrib[s] = initProb
+    
+    def getCombinedState(self):
+        state = self.beliefDistrib.argMax()
+        poison = Rule(POISONCARD, self.getBelievedEffectValue(POISONCARD))
+        screw = Rule(SCREWOPPONENT, self.getBelievedEffectValue(SCREWOPPONENT))
+        skip = Rule(SKIPPLAYER, self.getBelievedEffectValue(SKIPPLAYER))
+        effectState = EffectState(poison, screw, skip)
+        return CombinedState(state, effectState)
             
     def getBelievedEffectValue(self, effect):
         return self.believedEffectValues[effect]

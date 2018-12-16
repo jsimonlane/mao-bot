@@ -293,6 +293,7 @@ for player in g.players:
     print player.wins
     if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent:
         try:
+            print g.players[1].getCombinedState()
             print np.average(player.validPercentByRound)
         except:
             print 'div by zero'
