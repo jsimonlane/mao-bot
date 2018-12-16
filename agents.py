@@ -340,18 +340,59 @@ class HmmAgent(Agent):
         if notification.type == WON:
             # simulate dynamics -- occurs only on new round change
             #naive dynamics: reset the list
-            uniformProb = 1.0 / float(len(stateList))
-            for state in stateList:
-                self.beliefDistrib[state] = uniformProb # naive
-            self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
-            self.roundLegals = 0
-            self.roundIllegals = 0
-            return
-            
+            # uniformProb = 1.0 / float(len(stateList))
+            # for state in stateList:
+            #     self.beliefDistrib[state] = uniformProb # naive
+            # self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
+            # self.roundLegals = 0
+            # self.roundIllegals = 0
+            # return
+        
             #complex dynamics:
             # for each state with non-zero probability
               # find successor states, and add them as possiblities. But weight towards current state
               # then, renormalize the entire thing
+              
+              
+              # State = namedtuple('State', ['basicValueRule', 'wildValueRule', 'wildSuitRule', 'poisonDist'])
+            def isPossibleChild(stateA, stateB):
+                total = 0
+                for ruleA, ruleB in zip(stateA, stateB):
+                    if ruleA.setting == ruleB.setting:
+                        total += 1
+                if total >= 3:
+                    return True
+                else:
+                    return False
+                    
+            # get a list of states with non-zero probabilities
+            possiblePriorStates = []
+            for state in stateList:
+                if self.beliefDistrib[state] != 0:
+                    possiblePriorStates.append(state)
+            
+            newBeliefs = Counter()
+            
+            
+            pTransition = 1.0 / 25.0 * 4.0 / 7.0 # each state has 25 successors (2 + 15 + 3 + 5), and there is a 4/7 chance an effect was not chosen
+            for tMinusOne in possiblePriorStates:
+                newBeliefs[tMinusOne] += 3.0 / 7.0 * self.beliefDistrib[tMinusOne]
+                for successorState in stateList:
+                    if isPossibleChild(successorState, tMinusOne):
+                        newBeliefs[successorState] += pTransition * self.beliefDistrib[successorState]
+            
+            print "sanity check"
+            tot = 0
+            for belief in newBeliefs:
+                tot += newBeliefs[belief]
+            print tot
+            
+            newBeliefs.normalize()
+            self.beliefDistrib = newBeliefs
+            return
+            
+                    
+                    
             
         else:
             if notification.type == LEGAL:
@@ -369,4 +410,5 @@ class HmmAgent(Agent):
                         continue
                     else:
                         self.beliefDistrib[state] = 0
+            self.beliefDistrib.normalize()
             return
