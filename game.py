@@ -137,6 +137,8 @@ class Game(object):
                 self.pile = []
                 assert( origLen == len(self.deck.cards) ) #copying trips me out
                 self.deck.shuffle()
+                notification = Notification(DECKRESET, None, None)
+                self.notifyAll(notification)
                 return self.getCardFromDeck() #recurse, try to get another card
         else:
             return card
@@ -273,7 +275,7 @@ class Game(object):
                 print "round", self.round, t1-t0
 
 # tests
-pHuman = LearningAgent("J")
+pHuman = RandomAgent("J")
 # pBotw = RandomAgent("A1")
 # pBot2 = RandomAgent("A2")
 # pBot = LearningAgent("Learner2")
@@ -281,7 +283,7 @@ pBot1 = HmmAgent("Learner")
 
 # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
 g = Game([pHuman, pBot1], True)
-g.playGame(10)
+g.playGame(100)
 
 #print stats
 for player in g.players:
