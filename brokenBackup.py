@@ -518,6 +518,7 @@ class HmmAgent(Agent):
         elif rule.rule in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
             ### TODO #### Account for effect card distributions
             self.believedEffectValues[rule.rule] = rule.setting
+            return
 
         newBeliefs.normalize()
         self.beliefDistrib = newBeliefs
