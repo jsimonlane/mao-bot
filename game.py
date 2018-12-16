@@ -6,8 +6,9 @@ import time
 
 
 import copy
-from agents import *        
+from agents import *    
 
+TESTCARD = Card(value=13, suit="C")
 class Game(object):
     def __init__(self, players, autogame = True):
         
@@ -39,6 +40,9 @@ class Game(object):
         self.round = 0 # record which round we are on
         self.gameHistory = GameHistory() # records the history of the game for training data
         self.roundHistory = RoundHistory()
+
+        self.heuristicMode = True
+        self.testCard = TESTCARD 
         
     def makeModification(self, ruleTuple):
         rule = ruleTuple.rule
@@ -140,6 +144,32 @@ class Game(object):
                 return self.getCardFromDeck() #recurse, try to get another card
         else:
             return card
+    
+    def HeursiticCardFromDeck(self):
+        #  when this is run to build heuristic vals, 10% chance of test card
+        if self.heuristicMode:
+            if random.random() < float(0.10):
+                card = self.testCard
+            else:
+                card = self.deck.drawCard()
+
+        # for durability, reset the deck
+        if (card == None):
+            assert (len(self.deck.cards) == 0)
+            if (len(self.pile) == 0):
+                #sheesh. literally all the cards have been played
+                return None
+            else:
+                # NOTE: THESE ARE UNTESTED!!! WATCH OUT FOR THIS SECTION!
+                # make a new deck using the pile
+                origLen = len(self.pile) # for assert
+                self.deck.cards = copy.copy(self.pile) #preserves references I think
+                self.pile = []
+                assert( origLen == len(self.deck.cards) ) #copying trips me out
+                self.deck.shuffle()
+                return self.getCardFromDeck() #recurse, try to get another card
+        else:
+            return card
             
     def enactEffects(self, attemptedCard):
         """
@@ -204,7 +234,10 @@ class Game(object):
         else:
             # return the card to the player, and penalize them with a new card
             player.takeCard(attemptedCard)
-            penaltyCard = self.getCardFromDeck()
+            if player.name == "HeuristicTests":
+                penaltyCard = self.HeursiticCardFromDeck()
+            else:
+                penaltyCard = self.getCardFromDeck()
             if penaltyCard:
                 player.takeCard(penaltyCard)
                 
@@ -273,18 +306,19 @@ class Game(object):
                 print "round", self.round, t1-t0
 
 # tests
-pHuman = HumanAgent("J")
+pHuman = RandomAgent("Learner")
 # pBotw = RandomAgent("A1")
 # pBot2 = RandomAgent("A2")
 # pBot = LearningAgent("Learner2")
-pBot1 = RandomAgent("Learner")
+pBot1 = RandomAgent("HeuristicTests")
 
 # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
-g = Game([pHuman, pBot1], False)
-g.playGame(5)
+g = Game([pHuman, pBot1], True)
+g.playGame(1000)
 
 #print stats
 for player in g.players:
+    print "Card Tested: " + str(TESTCARD)
     print player.name
     print player.wins
     if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent:

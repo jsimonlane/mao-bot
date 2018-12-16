@@ -330,6 +330,37 @@ class HmmAgent(Agent):
         for s in stateList:
             self.beliefDistrib[s] = initProb
     
+    # a naive heuristic to judge the best card to play
+    def naiveHeuristic(self, legalCards, effects):
+        # basic progression of card strength from best to worst:
+        # ScrewOppponent Cards -> Skip Player Cards -> Lowest Value Legal Cards
+        if len(effects) == 3:
+            poisonCard = effects[0]
+            skipCard = effects[1]
+            screwCard = effects[2]
+        else: 
+            # if effects is malformed we can't easily pick a good card
+            return random.choice(legalCards)
+
+        for card in legalCards:
+            if card.value == screwCard:
+                return card
+        
+        for card in legalCards:
+            if card.value == skipCard:
+                return card
+
+        # Checks for smallest valued legal card
+        smallestCard = 15
+        smallestIndex = 0
+        for indx, card in enumerate(legalCards):
+            if card.value < smallestCard:
+                smallestCard = card.value
+                smallestIndex = indx
+
+        return legalCards[smallestIndex]
+
+    
     # return the card from your hand you want to play
     def chooseCard(self, lastCard):
         belief_state = self.beliefDistrib.argMax() 
@@ -338,9 +369,15 @@ class HmmAgent(Agent):
             notification = Notification(LEGAL, card, lastCard)
             if self.checker.isConsistent(notification, belief_state):
                 legal_cards.append(card)
+        # random strategy
+        # if len(legal_cards) != 0:
+        #     return random.choice(legal_cards)
+        # else: 
+        #     return random.choice(self.hand)
 
+        # naive strategy
         if len(legal_cards) != 0:
-            return random.choice(legal_cards)
+            return self.naiveHeuristic(legal_cards)
         else: 
             return random.choice(self.hand)
             
