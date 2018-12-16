@@ -18,7 +18,7 @@ SCREWOPPONENT = 7
 SKIPPLAYER = 8
 
 
-State = namedtuple('State', ['basicValueRule', 'wildValueRule', 'wildSuitRule', 'poisonDist'])
+State = namedtuple('State', ['basicValueRule', 'wildValueRule', 'wildSuitRule', 'poisonDistRule'])
 
 #initialize a list of states
 stateList = []

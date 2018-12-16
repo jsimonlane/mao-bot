@@ -10,7 +10,7 @@ from agents import *
 
 TESTCARD = Card(value=7, suit="C")
 class Game(object):
-    def __init__(self, players, autogame = True):
+    def __init__(self, players, autogame = True, TESTCARD = None):
         
         # constraints
         self.basicValueConstraint = constraints.BasicValueConstraint(True)
@@ -40,9 +40,10 @@ class Game(object):
         self.round = 0 # record which round we are on
         self.gameHistory = GameHistory() # records the history of the game for training data
         self.roundHistory = RoundHistory()
-
         self.heuristicMode = False
-        self.testCard = TESTCARD 
+        if TESTCARD:
+            self.heuristicMode = True
+            self.testCard = TESTCARD 
         
     def makeModification(self, ruleTuple):
         rule = ruleTuple.rule
@@ -256,7 +257,7 @@ class Game(object):
             player = self.players[self.activePlayer]
             result = self.playerTurn(player)
             if result == WON:
-                notification = Notification(WON, None, None)
+                notification = Notification(WON, player, None)
                 self.notifyAll(notification)
                 break
             else:
@@ -283,24 +284,28 @@ class Game(object):
                 t1 = time.time()
                 print "round", self.round, t1-t0
 
-# tests
-pHuman = HmmAgent("Learner")
-# pBotw = RandomAgent("A1")
-# pBot2 = RandomAgent("A2")
-# pBot = LearningAgent("Learner2")
-pBot1 = HeuristicAgent("NaiveTests")
+# /////////
+# 
+# Commenting out for use in tests.py
+# 
+# \\\\\\\\\
+# pHuman = HmmAgent("Learner")
+# # pBotw = RandomAgent("A1")
+# # pBot2 = RandomAgent("A2")
+# # pBot = LearningAgent("Learner2")
+# pBot1 = HeuristicAgent("NaiveTests")
 
-# g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
-g = Game([pHuman, pBot1], True)
-g.playGame(100)
+# # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
+# g = Game([pHuman, pBot1], True)
+# g.playGame(100)
 
-#print stats
-for player in g.players:
-    print "Card Tested: " + str(TESTCARD)
-    print player.name
-    print player.wins
-    if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent:
-        print np.average(player.validPercentByRound)
+# #print stats
+# for player in g.players:
+#     print "Card Tested: " + str(TESTCARD)
+#     print player.name
+#     print player.wins
+#     if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent:
+#         print np.average(player.validPercentByRound)
 
 
 
