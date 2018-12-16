@@ -343,9 +343,9 @@ class HmmAgent(Agent):
             # uniformProb = 1.0 / float(len(stateList))
             # for state in stateList:
             #     self.beliefDistrib[state] = uniformProb # naive
-            # self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
-            # self.roundLegals = 0
-            # self.roundIllegals = 0
+            self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
+            self.roundLegals = 0
+            self.roundIllegals = 0
             # return
         
             #complex dynamics:
@@ -379,13 +379,7 @@ class HmmAgent(Agent):
                 newBeliefs[tMinusOne] += 3.0 / 7.0 * self.beliefDistrib[tMinusOne]
                 for successorState in stateList:
                     if isPossibleChild(successorState, tMinusOne):
-                        newBeliefs[successorState] += pTransition * self.beliefDistrib[successorState]
-            
-            print "sanity check"
-            tot = 0
-            for belief in newBeliefs:
-                tot += newBeliefs[belief]
-            print tot
+                        newBeliefs[successorState] += pTransition
             
             newBeliefs.normalize()
             self.beliefDistrib = newBeliefs
