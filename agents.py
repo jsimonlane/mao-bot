@@ -405,7 +405,7 @@ class HmmAgent(Agent):
                         self.beliefDistrib[state] = 0
             self.beliefDistrib.normalize()
             return
-        
+
 
     def modifyRule(self, makeModification):
 
@@ -489,9 +489,18 @@ class cardCounter(HmmAgent):
         for card in self.hand:
             self.cardBelief[card] = 0
 
+    # TakeCard Method from Player Class to update when cards are in your hand
+    # def takeCard(self, card):
+    #     if card != None:
+    #         self.hand.append(card)
+    #         # If taking a card, it is impossible for opponent to have same card
+    #         self.cardBelief[card] = 0
+    #     else:
+    #         print "takeCard: no card drawn. This seems like trouble -- investigate"
 
     def notify(self, notification, game):
         super(HmmAgent, self).notify(notification, game)
+
 
         # If opponent just played
         if notification.type in [LEGAL, PENALTY, POISONCARD]:
