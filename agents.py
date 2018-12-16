@@ -348,7 +348,6 @@ class HmmAgent(Agent):
     
     # notified of an event in the game (a penalty, a success, or a win)
     def notify(self, notification, game):
-        
         if notification.type == WON:
             try:
                 self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
@@ -412,7 +411,9 @@ class HmmAgent(Agent):
             return   
             
             
-        elif type in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+        elif notification.type in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+            type = notification.type
+            # print "setting value of ", type
             self.believedEffectValues[type] = notification.attemptedCard.value
             self.inDangerOfSettingToNone[type] = False     
             
@@ -423,11 +424,13 @@ class HmmAgent(Agent):
                 for t in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
                     # if we haven't received a notification when we were expecting it, set a notification to None
                     if self.inDangerOfSettingToNone[t]:
+                        # print "dismayed", t
                         self.believedEffectValues[t] = None
                     
                     # set up the expectation of an effect notification 
                     v = self.believedEffectValues[t]
                     if v == notification.attemptedCard.value:
+                        # print "we expect a notification", t
                         self.inDangerOfSettingToNone[t] = True
                         
             elif notification.type == PENALTY:

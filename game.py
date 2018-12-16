@@ -29,7 +29,7 @@ class Game(object):
         self.autogame = autogame
         
         #deck stuff
-        self.startingHandSize = 7
+        self.startingHandSize = 5
         self.changeRuleRate = 1 #invariant -- DO NOT CHANGE
 
         self.deck = Deck() #pre-shuffled deck
