@@ -20,6 +20,12 @@ SKIPPLAYER = 8
 
 State = namedtuple('State', ['basicValueRule', 'wildValueRule', 'wildSuitRule', 'poisonDistRule'])
 
+EffectState = namedtuple('EffectState', ['poisonCardRule', 'screwOpponentRule', 'skipPlayerRule'])
+
+CombinedState = namedtuple('CombinedState', ['state', 'effectState'])
+
+Fstate = namedtuple('Fstate', ['hand', 'lastCard'])
+
 #initialize a list of states
 stateList = []
 suits = ['H', 'D', 'C', 'S', None]

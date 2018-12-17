@@ -31,7 +31,8 @@ class Game(object):
         
         #deck stuff
         self.startingHandSize = 5
-        self.changeRuleRate = 1
+        self.changeRuleRate = 1 #invariant -- DO NOT CHANGE
+
         self.deck = Deck() #pre-shuffled deck
         self.pile = [] # a list of discarded cards. DIFFERENT FROM DECK OBJECT. 
         self.lastCard = None
@@ -257,7 +258,7 @@ class Game(object):
             player = self.players[self.activePlayer]
             result = self.playerTurn(player)
             if result == WON:
-                notification = Notification(WON, player, None)
+                notification = Notification(WON, player, None) #hacky notification
                 self.notifyAll(notification)
                 break
             else:
@@ -307,6 +308,32 @@ class Game(object):
 #     if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent:
 #         print np.average(player.validPercentByRound)
 
+        
+    
+# tests
+pHuman = HmmAgent("Hmm Player2")
+# pBotw = RandomAgent("A1")
+# pBot2 = RandomAgent("A2")
+# pBot = LearningAgent("Learner2")
+pBot1 = HeuristicAgent("Heuristic Player1")
+
+# g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
+g = Game([pHuman, pBot1], True)
+
+g.playGame(1000)
+
+
+#print stats
+for player in g.players:
+    print player.name
+    print player.wins
+    if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent:
+        try:
+            print g.players[1].getCombinedState()
+            print np.average(player.validPercentByRound)
+        except:
+            print 'div by zero'
+        
 
 
 
