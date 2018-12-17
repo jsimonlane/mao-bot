@@ -292,23 +292,22 @@ class Game(object):
 # Commenting out for use in tests.py
 # 
 # \\\\\\\\\
-# pHuman = HmmAgent("Learner")
-# # pBotw = RandomAgent("A1")
-# # pBot2 = RandomAgent("A2")
-# # pBot = LearningAgent("Learner2")
-# pBot1 = HeuristicAgent("NaiveTests")
+pHuman = HmmAgent("Learner")
+# pBotw = RandomAgent("A1")
+# pBot2 = RandomAgent("A2")
+# pBot = LearningAgent("Learner2")
+pBot1 = RandomAgent("NaiveTests")
 
-# # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
-# g = Game([pHuman, pBot1], True)
-# g.playGame(100)
+# g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
+g = Game([pHuman, pBot1], True)
+g.playGame(100)
 
 # #print stats
-# for player in g.players:
-#     print "Card Tested: " + str(TESTCARD)
-#     print player.name
-#     print player.wins
-#     if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent:
-#         print np.average(player.validPercentByRound)
+for player in g.players:
+    print player.name
+    print player.wins
+    if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent:
+        print np.average(player.validPercentByRound)
 
         
     
