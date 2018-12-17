@@ -277,28 +277,29 @@ class Game(object):
         
     
 # tests
-pHuman = RandomAgent("J")
+pHuman = HmmAgent("J")
 # pBotw = RandomAgent("A1")
 # pBot2 = RandomAgent("A2")
 # pBot = LearningAgent("Learner2")
-pBot1 = HmmAgent("Learner")
+pBot1 = cardCounter("card")
 
 # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
-g = Game([pHuman, pBot1], True)
+player_names = ['J', 'card']
+player_wins = [[],[]]
+player_valid = [[],[]]
 
-g.playGame(100)
-
-
+for game in range(20):
+    g = Game([pHuman, pBot1], True)
+    g.playGame(20)
+    for i in range(len(g.players)):
+        player_wins[i].append(g.players[i].wins)
+        player_valid[i].append(np.average(g.players[i].validPercentByRound))
 #print stats
-for player in g.players:
-    print player.name
-    print player.wins
-    if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent:
-        try:
-            print g.players[1].getCombinedState()
-            print np.average(player.validPercentByRound)
-        except:
-            print 'div by zero'
+
+for i in range(2):
+    print player_names[i]
+    print np.sum(player_wins[i])
+    print np.mean(player_valid[i])
         
 
 

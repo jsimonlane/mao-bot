@@ -1,6 +1,8 @@
 from player import *
+import numpy as np
 import random
 import sys
+import copy
 
 # trueState = State(Rule(BASICVALUE, True), Rule(BASICSUIT, "S"), Rule(WILDVALUE, None), Rule(WILDSUIT, None))
 
@@ -528,22 +530,44 @@ class HmmAgent(Agent):
 # Card Counting Agent that plays expectimax type solution
 class cardCounter(HmmAgent):
     def __init__(self, name):
-        super(HmmAgent, self).__init__(name)
+        super(Agent, self).__init__(name)
         
+        self.checker = Checker()
+        self.beliefDistrib = Counter()
+        
+        self.inDangerOfSettingToNone = {}
+        self.believedEffectValues = {}
+        for t in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+            self.believedEffectValues[t] = None
+            self.inDangerOfSettingToNone[t] = False
+            
+        
+        self.roundIllegals = 0
+        self.roundLegals = 0
+        self.validPercentByRound = []
+        
+        # initialize list of states
+        initProb = 1 / float(len(stateList))
+        for s in stateList:
+            self.beliefDistrib[s] = initProb
+        
+        self.wonLast = 1
+        self.justShuffled = 0
         self.discard = []
         self.cardsAtLarge = []
         self.opHandSize = len(self.hand)
         self.cardBelief = {}
         
+        self.total_cards = []
         for s in ["D", "H", "S", "C"]:
             for v in range(2,15):
-                if Card(v,s) not in self.hand:
-                    self.cardsAtLarge.append(Card(v,s))
+                self.total_cards.append(Card(v,s))
+                self.cardBelief[Card(v,s)] = 0
 
-        for card in self.cardsAtLarge: 
-            self.cardBelief[card] = self.opHandSize/len(self.cardsAtLarge)
-        for card in self.hand:
-            self.cardBelief[card] = 0
+        # for card in self.cardsAtLarge: 
+        #     self.cardBelief[card] = self.opHandSize/len(self.cardsAtLarge)
+        # for card in self.hand:
+        #     self.cardBelief[card] = 0
 
     # TakeCard Method from Player Class to update when cards are in your hand
     # def takeCard(self, card):
@@ -555,52 +579,241 @@ class cardCounter(HmmAgent):
     #         print "takeCard: no card drawn. This seems like trouble -- investigate"
 
     def notify(self, notification, game):
-        super(HmmAgent, self).notify(notification, game)
-
-
-        # If opponent just played
-        if notification.type in [LEGAL, PENALTY, POISONCARD]:
-            cardPlayed = notification.attemptedCard
+        if notification.type == WON:
+            try:
+                self.validPercentByRound.append(float(self.roundLegals) / (self.roundIllegals + self.roundLegals) )
+            except:
+                print "div by 0"
+            self.roundLegals = 0
+            self.roundIllegals = 0
             
-            # Size of opponent hands combined
+            #reset 
+            for t in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+                self.inDangerOfSettingToNone[t] = False
+
+            ## super wacky -- we need know if we won the game, so we put "player" as "attemptedCard"
+            # immutable names is mostly great. Except when it isn't
+            if notification.attemptedCard == self: 
+                return
+                
+                
+            # simulate dynamics -- occurs only on new round change
+            #naive dynamics: reset the list
+            # uniformProb = 1.0 / float(len(stateList))
+            # for state in stateList:
+            #     self.beliefDistrib[state] = uniformProb # naive
+            # return
+        
+            #complex dynamics:
+            # for each state with non-zero probability
+              # find successor states, and add them as possiblities. But weight towards current state
+              # then, renormalize the entire thing
+              
+              
+              # State = namedtuple('State', ['basicValueRule', 'wildValueRule', 'wildSuitRule', 'poisonDist'])
+            def isPossibleChild(stateA, stateB):
+                total = 0
+                for ruleA, ruleB in zip(stateA, stateB):
+                    if ruleA.setting == ruleB.setting:
+                        total += 1
+                if total >= 3:
+                    return True
+                else:
+                    return False
+                    
+            # get a list of states with non-zero probabilities
+            possiblePriorStates = []
+            for state in stateList:
+                if self.beliefDistrib[state] != 0:
+                    possiblePriorStates.append(state)
+
+            newBeliefs = Counter()
+            
+            
+            pTransition = 1.0 / 25.0 * 4.0 / 7.0 # each state has 25 successors (2 + 15 + 3 + 5), and there is a 4/7 chance an effect was not chosen
+            for tMinusOne in possiblePriorStates:
+                newBeliefs[tMinusOne] += 3.0 / 7.0 * self.beliefDistrib[tMinusOne]
+                for successorState in stateList:
+                    if isPossibleChild(successorState, tMinusOne):
+                        newBeliefs[successorState] += pTransition
+            
+            newBeliefs.normalize()
+            self.beliefDistrib = newBeliefs
+            
+            
+            
+        elif notification.type in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+            type = notification.type
+            # print "setting value of ", type
+            self.believedEffectValues[type] = notification.attemptedCard.value
+            self.inDangerOfSettingToNone[type] = False     
+            
+        elif notification.type in [LEGAL, PENALTY]:
+            if notification.type == LEGAL:
+                res = True
+                
+                for t in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+                    # if we haven't received a notification when we were expecting it, set a notification to None
+                    if self.inDangerOfSettingToNone[t]:
+                        # print "dismayed", t
+                        self.believedEffectValues[t] = None
+                    
+                    # set up the expectation of an effect notification 
+                    v = self.believedEffectValues[t]
+                    if v == notification.attemptedCard.value:
+                        # print "we expect a notification", t
+                        self.inDangerOfSettingToNone[t] = True
+                        
+            elif notification.type == PENALTY:
+                res = False
+            # update probabilities based on state dynamics
+            for state in stateList: #same thing as belief distribution
+                if self.beliefDistrib[state] == 0:
+                    continue
+                else:
+                    if self.checker.isConsistent(notification, state) == res:
+                        continue
+                    else:
+                        self.beliefDistrib[state] = 0
+            self.beliefDistrib.normalize()
+            
+
+        if self.wonLast == 1:
+            self.discard = [notification.lastCard]
+            self.cardsAtLarge = []
             self.opHandSize = 0
             for player in game.players:
                 if player != self:
-                    self.opHandSize += len(player.hand)
+                    self.opHandSize += len(player.hand) 
+            self.cardBelief = {}
+            self.cardBelief[notification.lastCard] = 0
+            
+            for s in ["D", "H", "S", "C"]:
+                for v in range(2,15):
+                    if Card(v,s) not in self.hand:
+                        self.cardsAtLarge.append(Card(v,s))
+
+            self.cardsAtLarge.remove(notification.lastCard)
+
+            for card in self.cardsAtLarge: 
+                self.cardBelief[card] = self.opHandSize/len(self.cardsAtLarge)
+            
+            for card in self.hand:
+                self.cardBelief[card] = 0
+            self.wonLast = 0
+
+        
+        ####### WIN LOGIC ######
+
+        if notification.type == WON:
+            self.wonLast = 1
+            return
+
+
+        ###### DECK RESET LOGIC #####
+        if notification.type == DECKRESET:
+            self.cardsAtLarge = copy.copy(self.discard)
+            self.discard = []
+
+        if game.players[game.activePlayer] != self:
+        # If opponent just played
+            cardPlayed = notification.attemptedCard
 
             # if legal move played, card no longer in hand
             if notification.type == LEGAL:
                 self.discard.append(cardPlayed)
-                self.cardsAtLarge.remove(cardPlayed)
+                if cardPlayed in self.cardsAtLarge:
+                    self.cardsAtLarge.remove(cardPlayed)
                 self.cardBelief[cardPlayed] = 0
 
-
-            
             # if penalty, card returned to op hand 
             elif notification.type == PENALTY:
                 self.cardBelief[cardPlayed] = 1
+                if cardPlayed in self.cardsAtLarge:
+                    self.cardsAtLarge.remove(cardPlayed)
+ 
+        #Case if you just played
+        else:
+            
 
-            spotsAtLarge = self.opHandSize
-            for card in self.cardBelief:
-                if self.cardBelief[card] > 0.99:
-                    spotsAtLarge -= 1
-            for card in self.cardsAtLarge:
-                self.cardBelief[card] = spotsAtLarge / len(self.cardsAtLarge) 
-        # Need Case if you just played
+            cardPlayed = notification.attemptedCard
+            if notification.type == LEGAL:
+                self.discard.append(cardPlayed)
 
+        for card in self.hand:
+            if card in self.cardsAtLarge:
+                self.cardsAtLarge.remove(card)
+            self.cardBelief[card] = 0
+
+        # Size of opponent hands combined
+        self.opHandSize = 0
+        for player in game.players:
+            if player != self:
+                self.opHandSize += len(player.hand)
+
+        spotsAtLarge = self.opHandSize
+        for card in self.cardBelief:
+            if self.cardBelief[card] > 0.99:
+                spotsAtLarge -= 1
+                if card in self.cardsAtLarge:
+                    self.cardsAtLarge.remove(card)
+                
         
+        for card in self.cardsAtLarge:
+            self.cardBelief[card] = spotsAtLarge / float(len(self.cardsAtLarge))
 
+        beliefsum = sum(self.cardBelief.values())
+        opHandSize = float(self.opHandSize)
+        
 
     def screwOpponent(self, playerList):
         targets = []
+        targetCards = []
         for i, player in enumerate(playerList):
             if player.name != self.name:
                 targets.append(i)
+                targetCards = len(player.hand)
+        
         if (len(targets) == 0):
             print "this really shouldn't happen -- in screw opponent"
-
             return (0, random.choice(self.hand)) #error checking
         else:
-            return random.choice(targets), random.choice(self.hand)
+            giveCard = random.choice(self.hand)
+            giveTarget = targets[np.argmax(targetCards)]
+            self.cardBelief[giveCard] = 1
+            return giveTarget, giveCard
+
+    def chooseCard(self, lastCard):
+        belief_state = self.beliefDistrib.argMax() 
+        legal_cards = []
+        for index, card in enumerate(self.hand):
+            notification = Notification(LEGAL, card, lastCard)
+            if self.checker.isConsistent(notification, belief_state):
+                legal_cards.append(card)
+
+        def chooseFewestCounters(cards, total_cards, belief_state, believedEffectValues, cardBelief, checker):
+            counterPlays = []
+            for card in cards:
+                counterPlay = 0
+                for counterCard in total_cards:
+                    if cardBelief[counterCard] > 0:
+                        notification = Notification(LEGAL, counterCard, card)
+                        if checker.isConsistent(notification, belief_state):
+                            constant = 0
+                            if believedEffectValues[SKIPPLAYER] == counterCard.value:
+                                constant += 2
+                            if believedEffectValues[POISONCARD] == counterCard.value:
+                                constant -= 2
+                            if believedEffectValues[SCREWOPPONENT] == counterCard.value:
+                                constant += 2
+                            counterPlay += 1*cardBelief[counterCard] *constant
+                counterPlays.append(counterPlay)
+            return cards[np.argmin(counterPlays)]
+
+        if len(legal_cards) != 0:
+            return chooseFewestCounters(legal_cards, self.total_cards, belief_state, self.believedEffectValues, self.cardBelief, self.checker)
+        else: 
+            return chooseFewestCounters(self.hand, self.total_cards, belief_state, self.believedEffectValues, self.cardBelief, self.checker)
+
 
 
