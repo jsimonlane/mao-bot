@@ -24,11 +24,10 @@ class QLearner(Agent):
         self.weights = Counter()
         self.features = features
         for feature in features:
-            self.weights[feature] = 0
-            
-        self.alpha = 0.1
+            self.weights[feature] = -1.0
+        self.alpha = 0.01
         self.epsilon = 0.2
-        self.discount = 0.3
+        self.discount = 0.8
         
         self.gameRef = None
         self.lastAction = None
@@ -58,6 +57,7 @@ class QLearner(Agent):
         diff = reward + self.discount * self.getStateValue(nextFstate) - self.getQValue(fstate, action)
 
         featuresToActivity = featureDict(self.features, fstate, action, self.combostate)
+        
         for feature, featureActivity in featuresToActivity.iteritems():
             self.weights[feature] = self.weights[feature] + self.alpha * diff * featureActivity
 

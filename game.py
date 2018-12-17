@@ -326,7 +326,7 @@ pBot1 = RandomAgent("NaiveTests")
 
 # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
 g = Game([qBot, pBot1], True)
-g.playGame(5)
+g.playGame(500)
 
 # #print stats
 for player in g.players:
