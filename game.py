@@ -277,18 +277,40 @@ class Game(object):
         
     
 # tests
-pHuman = HmmAgent("J")
-# pBotw = RandomAgent("A1")
-# pBot2 = RandomAgent("A2")
-# pBot = LearningAgent("Learner2")
-pBot1 = cardCounter("card")
+# pHuman = RandomAgent("J")
+# # pBotw = RandomAgent("A1")
+# # pBot2 = RandomAgent("A2")
+# # pBot = LearningAgent("Learner2")
+# pBot1 = HmmAgent("Learner")
 
 # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
-player_names = ['J', 'card']
+# g = Game([pHuman, pBot1], True)
+
+# g.playGame(100)
+
+
+# #print stats
+# for player in g.players:
+#     print player.name
+#     print player.wins
+#     if type(player) == cardCounter or type(player) == RandomAgent or type(player) == HmmAgent:
+#         try:
+#             print g.players[1].getCombinedState()
+#             print np.average(player.validPercentByRound)
+#         except:
+#             print 'div by zero'
+
+player_names = ['J', 'lerner']
 player_wins = [[],[]]
 player_valid = [[],[]]
 
-for game in range(20):
+for game in range(500):
+    pHuman = HmmAgent("J")
+# pBotw = RandomAgent("A1")
+# pBot2 = RandomAgent("A2")
+# pBot = LearningAgent("Learner2")
+    pBot1 = cardCounter("Learner")
+    print "game:", game
     g = Game([pHuman, pBot1], True)
     g.playGame(20)
     for i in range(len(g.players)):

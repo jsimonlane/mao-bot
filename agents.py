@@ -791,29 +791,41 @@ class cardCounter(HmmAgent):
             if self.checker.isConsistent(notification, belief_state):
                 legal_cards.append(card)
 
-        def chooseFewestCounters(cards, total_cards, belief_state, believedEffectValues, cardBelief, checker):
-            counterPlays = []
-            for card in cards:
-                counterPlay = 0
-                for counterCard in total_cards:
-                    if cardBelief[counterCard] > 0:
-                        notification = Notification(LEGAL, counterCard, card)
-                        if checker.isConsistent(notification, belief_state):
-                            constant = 0
-                            if believedEffectValues[SKIPPLAYER] == counterCard.value:
-                                constant += 2
-                            if believedEffectValues[POISONCARD] == counterCard.value:
-                                constant -= 2
-                            if believedEffectValues[SCREWOPPONENT] == counterCard.value:
-                                constant += 2
-                            counterPlay += 1*cardBelief[counterCard] *constant
-                counterPlays.append(counterPlay)
-            return cards[np.argmin(counterPlays)]
-
         if len(legal_cards) != 0:
-            return chooseFewestCounters(legal_cards, self.total_cards, belief_state, self.believedEffectValues, self.cardBelief, self.checker)
+            counterPlays = []
+            for card in legal_cards:
+                counterPlay = 0
+                for counterCard in self.total_cards:
+                    if self.cardBelief[counterCard] > 0:
+                        notification2 = Notification(LEGAL, counterCard, card)
+                        if self.checker.isConsistent(notification, belief_state):
+                            constant = 0
+                            if self.believedEffectValues[SKIPPLAYER] == counterCard.value:
+                                constant += 2
+                            if self.believedEffectValues[POISONCARD] == counterCard.value:
+                                constant -= 2
+                            if self.believedEffectValues[SCREWOPPONENT] == counterCard.value:
+                                constant += 2
+                            counterPlay += 1*self.cardBelief[counterCard] *constant
+                counterPlays.append(counterPlay)
+            return legal_cards[np.argmin(counterPlays)]
         else: 
-            return chooseFewestCounters(self.hand, self.total_cards, belief_state, self.believedEffectValues, self.cardBelief, self.checker)
-
+            counterPlays = []
+            for card in self.hand:
+                counterPlay = 0
+                for counterCard in self.total_cards:
+                    if self.cardBelief[counterCard] > 0:
+                        notification2 = Notification(LEGAL, counterCard, card)
+                        if self.checker.isConsistent(notification, belief_state):
+                            constant = 0
+                            if self.believedEffectValues[SKIPPLAYER] == counterCard.value:
+                                constant += 2
+                            if self.believedEffectValues[POISONCARD] == counterCard.value:
+                                constant -= 2
+                            if self.believedEffectValues[SCREWOPPONENT] == counterCard.value:
+                                constant += 2
+                            counterPlay += 1*self.cardBelief[counterCard]
+                counterPlays.append(counterPlay)
+            return self.hand[np.argmin(counterPlays)]
 
 
