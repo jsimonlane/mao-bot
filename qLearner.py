@@ -1,9 +1,7 @@
-from agents import *
+lastActionfrom agents import *
 from features import *
 
 def calculateReward(fstate, action, combo, nextFstate):
-    
-    # 
     if len(nextFstate.hand) == 0:
         # you won!
         return 15
@@ -15,16 +13,30 @@ def calculateReward(fstate, action, combo, nextFstate):
 
 #NOTE: Inspired by PSet 3 QLearning framework -- THANK YOU BERKELEY!
 class QLearner(Agent):
-    def __init__(self, name):
+    """
+    In general:
+    state : Fstate
+    action : card
+    """
+    def __init__(self, name, features):
         super(Agent, self).__init__(name)
         self.weights = Counter()
+        self.features = features
+        for feature in features:
+            self.weights[feature] = 0
+            
+        
+        self.gameRef = None
+        self.lastAction = None
+        self.lastFstate = None
+        self.combostate = None
     
     def getQValue(self, state, action):
         """
         Q(s, a) = w_1 f_1 + w_2 f_2 + ... + w_n f_n
         """
         qValue = 0.0
-        featuresToActivity = # get FEATURE DICT
+        featuresToActivity = featureDict(self.features)
         for feature, featureActivity in featuresToActivity.iteritems():
             qValue = qValue + self.weights[feature] * featureActivity
         return qValue
@@ -40,7 +52,7 @@ class QLearner(Agent):
         """
         diff = reward + self.discount * self.getStateValue(nextState) - self.getQValue(state, action)
 
-        featuresToActivity = #get FEATURE DICT
+        featuresToActivity = featureDict(self.features)
         for feature, featureActivity in features.iteritems():
             self.weights[feature] = self.weights[feature] + self.alpha * diff * featureActivity
 
@@ -77,6 +89,48 @@ class QLearner(Agent):
         return state.hand
         # return a list of legal actions! -- ie, cards that can be played
     
+
+    def chooseCard(self, lastCard, aggressive=False):
+        #place where we set a state
+        if not aggressive:
+            currentFstate = Fstate(self.hand[:], lastCard)
+            # choose a card
+            cardToPlay = random.choice(self.hand)
+            
+            #this is NOT our first move
+            if self.lastFstate != None:
+                # calcuate the reward and update
+                reward = calculateReward(self.lastFstate, self.lastAction, self.combostate, currentFstate)
+                self.update(self.lastFstate, self.lastAction, currentFstate, reward)            
+            
+            self.lastFstate = currentFstate
+            self.lastAction = cardToPlay
+            return cardToPlay
+        else:
+            return random.choice(self.hand)
+
+
+    def notify(self, notification, game):
+        # if I just played a card
+        if notification.type == NEWGAME:
+            
+            self.gameRef = game
+            self.combostate = game.getCombinedState()
+            self.lastAction = None
+            self.lastFstate = None
+            
+        if notification.type == WON:
+            self.gameRef = None # to prevent circular reference counting
+            
+            #if we won
+            if game.players[game.activePlayer] == self:
+                finalFstate = Fstate(self.hand[:], game.lastCard)
+                reward = calculateReward(self.lastFstate, self.lastAction, self.combostate, self.currentFstate)
+                self.update(self.lastFstate, self.lastAction, finalFstate, reward) 
+            # else, someone else won
+            else:
+                
+            
 
 
 #
