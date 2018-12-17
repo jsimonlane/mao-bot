@@ -66,12 +66,46 @@ class Illegality(Feature):
         else:
             return 0
 
+class WildValue(Feature):
+    def __init__ (self, fstate, action, combostate):
+        self.fstate = fstate
+        self.action = action
+        self.combostate = combostate
+
+    def f(self):
+        actionCard = self.action
+        lastCard = self.fstate.lastCard
+        constraintState = combostate.state
+        isLegalGivenState = self.checker.isConsistent(Notification(LEGAL, actionCard, lastCard), constraintState)
+        if isLegalGivenState:
+            return 1
+        else:
+            return 0
+
 def featureDict(featureList, state, action, combo ):
     featureDict = {}
     for feature in featureList:
         featureDict[feature] = feature(state,action,combo).f()
     return featureDict
 
+def R(fstate, action, combo, nextFstate):
+    if len(fstate.hand) - len(nextFstate.hand) == 1:
+        
+        if len(nextFstate.hand) == 0:
+            # you won!
+            return 500
+        else:
+            return 1
+    if len(fstate.hand) - len(nextFstate.hand) == -1:
+        return -1
+    if len(fstate.hand) - len(nextFstate.hand) == -2:
+        return -2
+    if len(fstate.hand) == len(nextFstate.hand):
+        return 0
+    else:
+        return 0
+
+    
 # \\\\\\\\\\\\\\\\
 # 
 # Testing stuff
