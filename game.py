@@ -45,21 +45,6 @@ class Game(object):
         if TESTCARD:
             self.heuristicMode = True
             self.testCard = TESTCARD 
-    
-    def deliverCombostate(self):
-        bVal = Rule(BASICVALUE, self.basicValueConstraint.greater)
-        wVal = Rule(WILDVALUE, self.wildValueConstraint.wildValue)
-        wSuit = Rule(WILDSUIT, self.wildSuitEffect.wildSuit)
-        pDist = Rule(POISONDIST, self.poisonDistanceConstraint.dist)
-        
-        pCard = Rule(POISONCARD, self.poisonCardEffect.value)
-        skip = Rule(SKIPPLAYER, self.skipPlayerEffect.activatingValue)
-        screw = Rule(SCREWOPPONENT, self.screwOpponentEffect.activatingValue)
-        
-        state = State(bVal, wVal, wSuit, pDist)
-        effectState = EffectState(pCard, screw, skip)
-        
-        return CombinedState(state, effectState)
         
     def makeModification(self, ruleTuple):
         rule = ruleTuple.rule
@@ -327,13 +312,14 @@ class Game(object):
 
         
     
+# tests
+# pHuman = RandomAgent("J")
+# # pBotw = RandomAgent("A1")
+# # pBot2 = RandomAgent("A2")
+# # pBot = LearningAgent("Learner2")
+# pBot1 = HmmAgent("Learner")
 
-# # tests
-# # pHuman = RandomAgent("J")
-# # # pBotw = RandomAgent("A1")
-# # # pBot2 = RandomAgent("A2")
-# # # pBot = LearningAgent("Learner2")
-# # pBot1 = HmmAgent("Learner")
+# g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
 
 
 # #print stats
@@ -347,35 +333,30 @@ class Game(object):
 #         except:
 #             print 'div by zero'
 
-pHuman = HmmAgent("Hmm Player2")
-# pBotw = RandomAgent("A1")
-# pBot2 = RandomAgent("A2")
-# pBot = LearningAgent("Learner2")
-pBot1 = HeuristicAgent("Heuristic Player1")
 
-player_names = ['J', 'lerner']
-player_wins = [[],[]]
-player_valid = [[],[]]
+# player_names = ['J', 'lerner']
+# player_wins = [[],[]]
+# player_valid = [[],[]]
 
 
-for game in range(500):
-    pHuman = HmmAgent("J")
-# pBotw = RandomAgent("A1")
-# pBot2 = RandomAgent("A2")
-# pBot = LearningAgent("Learner2")
-    pBot1 = cardCounter("Learner")
-    print "game:", game
-    g = Game([pHuman, pBot1], True)
-    g.playGame(20)
-    for i in range(len(g.players)):
-        player_wins[i].append(g.players[i].wins)
-        player_valid[i].append(np.average(g.players[i].validPercentByRound))
-#print stats
+# for game in range(500):
+#     pHuman = HmmAgent("J")
+# # pBotw = RandomAgent("A1")
+# # pBot2 = RandomAgent("A2")
+# # pBot = LearningAgent("Learner2")
+#     pBot1 = cardCounter("Learner")
+#     print "game:", game
+#     g = Game([pHuman, pBot1], True)
+#     g.playGame(20)
+#     for i in range(len(g.players)):
+#         player_wins[i].append(g.players[i].wins)
+#         player_valid[i].append(np.average(g.players[i].validPercentByRound))
+# #print stats
 
-for i in range(2):
-    print player_names[i]
-    print np.sum(player_wins[i])
-    print np.mean(player_valid[i])
+# for i in range(2):
+#     print player_names[i]
+#     print np.sum(player_wins[i])
+#     print np.mean(player_valid[i])
         
 
 

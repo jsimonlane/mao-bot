@@ -34,7 +34,7 @@ class HighCount(Feature):
     def f(self, fstate, action, combostate):
         #if greater is more powerful
         highCards = 0
-        if (fstate.state.basicValueRule.setting == True):            
+        if (combostate.state.basicValueRule.setting == True):            
             for card in fstate.hand:
                 if card.value >= 11:
                     highCards += 1 
@@ -49,7 +49,7 @@ class LowCount(Feature):
     def f(self, fstate, action, combostate):
         #if greater is more powerful
         lowCards = 0
-        if (fstate.state.basicValueRule.setting == True):            
+        if (combostate.state.basicValueRule.setting == True):            
             for card in fstate.hand:
                 if card.value <= 5:
                     lowCards += 1 
@@ -165,33 +165,33 @@ class WildSuit(Feature):
 # 
 # ////////////////
 
-# # Fake rules gethhelelp
-# bvRule = Rule('basicValueRule', 2)
-# wvRule = Rule('wildValueRule', 8)
-# wsRule = Rule('wildSuitRule', 'C')
-# pdRule = Rule('poisonDistRule', 9)
-# 
-# # fake effects (not inited)
-# pcRule = Rule('poisonCardRule', 14)
-# soRule = Rule('screwOpponentRule', 99)
-# spRule = Rule('skipPlayerRule', 99)
-# 
-# # fake state
-# ruleState = State(bvRule, wvRule, wsRule, pdRule)
-# effectState = EffectState(pcRule, soRule,spRule)
-# 
-# # combined
-# combostate = CombinedState(ruleState,effectState)
-# 
-# # Cards
-# card1 = Card(2, "C")
-# card2 = Card(13, "H")
-# card4 = Card(8, "H")
-# card3 = Card(14, "C")
-# 
-# testFstate = Fstate([card1, card3, card4], card2)
-# testAction = card2
-# 
+# Fake rules gethhelelp
+bvRule = Rule('basicValueRule', 2)
+wvRule = Rule('wildValueRule', 8)
+wsRule = Rule('wildSuitRule', 'C')
+pdRule = Rule('poisonDistRule', 9)
+
+# fake effects (not inited)
+pcRule = Rule('poisonCardRule', 14)
+soRule = Rule('screwOpponentRule', 99)
+spRule = Rule('skipPlayerRule', 99)
+
+# fake state
+ruleState = State(bvRule, wvRule, wsRule, pdRule)
+effectState = EffectState(pcRule, soRule,spRule)
+
+# combined
+combostate = CombinedState(ruleState,effectState)
+
+# Cards
+card1 = Card(2, "C")
+card2 = Card(13, "H")
+card4 = Card(8, "H")
+card3 = Card(14, "C")
+
+testFstate = Fstate([card1, card3, card4], card2)
+testAction = card2
+
 # print WildSuit(testFstate, testAction, combostate).f()
 
-# print featureDict([Illegality, LowCount], testFstate, testAction, combostate)
+print featureDict([MajorityPercent(), PoisonCount()], testFstate, testAction, combostate)
