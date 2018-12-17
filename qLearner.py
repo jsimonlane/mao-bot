@@ -10,7 +10,7 @@ def calculateReward(fstate, action, combo, nextFstate):
         return -15
             
     # if you lose cards, + reward. if you gain cards, - reward
-    return len(fstate.hand) - len(nextFstate.hand)
+    return len(fstate.hand) - len(nextFstate.hand) - len(fstate.opponentHand) + len(nextFstate.opponentHand)
 
 #NOTE: Inspired by PSet 3 QLearning framework -- THANK YOU BERKELEY!
 class QLearner(Agent):
@@ -28,6 +28,7 @@ class QLearner(Agent):
             
         self.alpha = 0.1
         self.epsilon = 0.2
+        self.discount = 0.3
         
         self.gameRef = None
         self.lastAction = None
@@ -45,7 +46,7 @@ class QLearner(Agent):
             qValue = qValue + self.weights[feature] * featureActivity
         return qValue
     
-    def update(self, fstate, action, nextFState, reward):
+    def update(self, fstate, action, nextFstate, reward):
         """
         updates the weights, in response to an episode
         
@@ -54,10 +55,10 @@ class QLearner(Agent):
                 diff = reward + gamma * V(s') - Q(s, a)
                     NOTE: V(s') = max_a' Q(s', a')
         """
-        diff = reward + self.discount * self.getStateValue(nextFState) - self.getQValue(fstate, action)
+        diff = reward + self.discount * self.getStateValue(nextFstate) - self.getQValue(fstate, action)
 
         featuresToActivity = featureDict(self.features, fstate, action, self.combostate)
-        for feature, featureActivity in features.iteritems():
+        for feature, featureActivity in featuresToActivity.iteritems():
             self.weights[feature] = self.weights[feature] + self.alpha * diff * featureActivity
 
     def getStateValue(self, fstate):
@@ -84,7 +85,7 @@ class QLearner(Agent):
         valuesForActions = Counter()
         for action in self.getLegalActions(state):
             valuesForActions[action] = self.getQValue(state,action)
-        if (returnStateValue):
+        if (doReturnState):
             return valuesForActions[valuesForActions.argMax()]
         else:
             return valuesForActions.argMax()
@@ -109,7 +110,7 @@ class QLearner(Agent):
         if not aggressive:
             currentFstate = Fstate(self.hand[:], lastCard, self.opponent.hand[:])
             # choose a card
-            cardToPlay = self.getAction()
+            cardToPlay = self.getAction(currentFstate)
             
             #this is NOT our first move
             if self.lastFstate != None:
@@ -141,7 +142,7 @@ class QLearner(Agent):
             
         if notification.type == WON:
             finalFstate = Fstate(self.hand[:], game.lastCard, self.opponent.hand[:])
-            reward = calculateReward(self.lastFstate, self.lastAction, self.combostate, self.currentFstate)
+            reward = calculateReward(self.lastFstate, self.lastAction, self.combostate, finalFstate)
             self.update(self.lastFstate, self.lastAction, finalFstate, reward) 
 
             self.gameRef = None # to prevent circular reference counting

@@ -295,12 +295,13 @@ class Game(object):
     
     def playGame(self, numRounds=10):
         winner = 0
+        roundPrint = 16
         for i in range(numRounds):
-            if self.round % 1024 == 0:
+            if self.round % roundPrint == 0:
                 t0 = time.time()
             winner = self.playRound(winner)
             
-            if self.round % 1024 == 0:
+            if self.round % roundPrint == 0:
                 t1 = time.time()
                 print "round", self.round, t1-t0
 
@@ -325,7 +326,7 @@ pBot1 = RandomAgent("NaiveTests")
 
 # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
 g = Game([qBot, pBot1], True)
-g.playGame(100)
+g.playGame(5)
 
 # #print stats
 for player in g.players:
@@ -333,6 +334,8 @@ for player in g.players:
     print player.wins
     if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent:
         print np.average(player.validPercentByRound)
+    if type(player) == QLearner:
+        print player.weights
 
         
     
