@@ -316,14 +316,24 @@ class HmmAgent(Agent):
             self.inDangerOfSettingToNone[t] = False
             
         
-        self.roundIllegals = 0
-        self.roundLegals = 0
-        self.validPercentByRound = []
-        
+
         # initialize list of states
         initProb = 1 / float(len(stateList))
         for s in stateList:
             self.beliefDistrib[s] = initProb
+
+        # Init params for Data collection
+        self.numStates = []
+        self.notificationMatch = [0]
+        self.possibleStates = 0
+        for state in self.beliefDistrib:
+            if self.beliefDistrib[state] > 0:
+                self.possibleStates += 1
+        self.numStates.append(self.possibleStates)
+
+        self.roundIllegals = 0
+        self.roundLegals = 0
+        self.validPercentByRound = []
 
     
     def getCombinedState(self):
@@ -373,6 +383,16 @@ class HmmAgent(Agent):
             self.roundLegals = 0
             self.roundIllegals = 0
             
+            youWon = 0
+            if notification.attemptedCard == self:
+                youWon = 1
+            self.notificationMatch.append(notification.type + youWon)
+            self.possibleStates = 0
+            for state in self.beliefDistrib:
+                if self.beliefDistrib[state] > 0:
+                    self.possibleStates += 1
+            self.numStates.append(self.possibleStates)
+
             #reset 
             for t in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
                 self.inDangerOfSettingToNone[t] = False
@@ -435,6 +455,13 @@ class HmmAgent(Agent):
             self.inDangerOfSettingToNone[type] = False     
             
         elif notification.type in [LEGAL, PENALTY]:
+            self.notificationMatch.append(notification.type)
+            self.possibleStates = 0
+            for state in self.beliefDistrib:
+                if self.beliefDistrib[state] > 0:
+                    self.possibleStates += 1
+            self.numStates.append(self.possibleStates)
+
             if notification.type == LEGAL:
                 res = True
                 
