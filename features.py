@@ -156,8 +156,29 @@ class WildSuit(Feature):
         return trumpSuit
 
 
+class AceCount(Feature):
     
+    def f(self, fstate, action, combostate):
+        aces = 0
+        for card in fstate.hand:
+            if card.value == 14:
+                aces += 1 
+        return aces
 
+class TwoCount(Feature):
+    def f(self, fstate, action, combostate):
+        twos = 0
+        for card in fstate.hand:
+            if card.value == 2:
+                twos += 1 
+        return twos
+
+
+class OpponentCards(Feature):
+    
+    def f(self, fstate, action, combostate):
+        #num cards in opponent's hand
+        return len(fstate.opponentHand)
 
 # \\\\\\\\\\\\\\\\
 # 
