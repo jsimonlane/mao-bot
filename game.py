@@ -312,16 +312,14 @@ class Game(object):
 
         
     
-# tests
-# pHuman = RandomAgent("J")
-# # pBotw = RandomAgent("A1")
-# # pBot2 = RandomAgent("A2")
-# # pBot = LearningAgent("Learner2")
-# pBot1 = HmmAgent("Learner")
 
-# g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
+# # tests
+# # pHuman = RandomAgent("J")
+# # # pBotw = RandomAgent("A1")
+# # # pBot2 = RandomAgent("A2")
+# # # pBot = LearningAgent("Learner2")
+# # pBot1 = HmmAgent("Learner")
 
-# g.playGame(1000)
 
 # #print stats
 # for player in g.players:

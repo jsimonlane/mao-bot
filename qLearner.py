@@ -7,13 +7,13 @@ class QLearner(Agent):
         super(Agent, self).__init__(name)
         self.weights = Counter()
         self.combostate = None
-        self.features = [Illegality(), LowCount(), HighCount(), SizeofHand()]
+        self.features = [Illegality, LowCount, HighCount, SizeofHand]
     def getQValue(self, state, action):
         """
         Q(s, a) = w_1 f_1 + w_2 f_2 + ... + w_n f_n
         """
         qValue = 0.0
-        featuresToActivity = featureDict(self.features, state, action, self..combostate)
+        featuresToActivity = featureDict(self.features, state, action, self.combostate)
         for feature, featureActivity in featuresToActivity.iteritems():
             qValue = qValue + self.weights[feature] * featureActivity
         return qValue
@@ -28,7 +28,6 @@ class QLearner(Agent):
                     NOTE: V(s') = max_a' Q(s', a')
         """
         diff = reward + self.discount * self.getStateValue(nextState) - self.getQValue(state, action)
-
         featuresToActivity = featureDict(self.features, state, action, self..combostate)
         for feature, featureActivity in features.iteritems():
             self.weights[feature] = self.weights[feature] + self.alpha * diff * featureActivity
