@@ -72,6 +72,55 @@ def featureDict(featureList, state, action, combo ):
         featureDict[feature] = feature(state,action,combo).f()
     return featureDict
 
+class skipCount(Feature):
+    def __init__ (self, fstate, action, combostate):
+        self.fstate = fstate
+        self.action = action
+        self.combostate = combostate
+    def f(self):
+        skipCards = 0
+        for card in self.fstate.hand:
+            if card.value == combostate.effectState.skipPlayerRule.setting:
+                skipCards += 1 
+        return skipCards
+
+class screwCount(Feature):
+    def __init__ (self, fstate, action, combostate):
+        self.fstate = fstate
+        self.action = action
+        self.combostate = combostate
+    def f(self):
+        screwCards = 0
+        for card in self.fstate.hand:
+            if card.value == combostate.effectState.screwOpponentRule.setting:
+                screwCards += 1 
+        return screwCards
+
+class poisonCount(Feature):
+    def __init__ (self, fstate, action, combostate):
+        self.fstate = fstate
+        self.action = action
+        self.combostate = combostate
+    def f(self):
+        poisonCards = 0
+        for card in self.fstate.hand:
+            if card.value == combostate.effectState.poisonCardRule.setting:
+                poisonCards += 1 
+        return poisonCards
+
+class wildSuit(Feature):
+    def __init__ (self, fstate, action, combostate):
+        self.fstate = fstate
+        self.action = action
+        self.combostate = combostate
+    def f(self):
+        trumpSuit = 0
+        if combostate.state.wildSuitRule.setting != None:
+            for card in self.fstate.hand:
+                if card.suit == combostate.state.wildSuitRule.setting:
+                    trumpSuit += 1 
+        return trumpSuit
+
 # \\\\\\\\\\\\\\\\
 # 
 # Testing stuff
