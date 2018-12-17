@@ -61,7 +61,7 @@ class QLearner(Agent):
             return valuesForActions.argMax()
         
     def getLegalActions(self, state):
-        pass
+        return state.hand
         # return a list of legal actions! -- ie, cards that can be played
     
 
