@@ -463,12 +463,7 @@ class HmmAgent(Agent):
                         self.beliefDistrib[state] = 0
             self.beliefDistrib.normalize()
             return
-<<<<<<< HEAD
-        
-=======
 
-
->>>>>>> 5d5a053a581da54fc37d92c567bcf5f2e1776677
     def modifyRule(self, makeModification):
 
         ruletype = random.choice([BASICVALUE, WILDVALUE, WILDSUIT, POISONDIST, POISONCARD, SCREWOPPONENT, SKIPPLAYER])
@@ -906,5 +901,3 @@ class cardCounter(HmmAgent):
                             counterPlay += 1*self.cardBelief[counterCard]
                 counterPlays.append(counterPlay)
             return self.hand[np.argmin(counterPlays)]
-
-
