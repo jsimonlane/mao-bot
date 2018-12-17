@@ -1,111 +1,112 @@
 from infrastructure import *
 
-class Feature(object):
-    def __init__ (self, fstate, action, combostate):
-        self.fstate = fstate
-        self.action = action
-        self.combostate = combostate
+    
+    
+# CRUCIAL METHOD
+def featureDict(featureList, fstate, action, combo):
+    """
+    fstate : Fstate -- the feature state
+    action : Card -- the card you are trying to play
+    combo  : Combostate -- the combined state of rules and effects
+    
+    given a list of features, returns a dictionary mapping:
+        feature -> featureActivity (given fstate, action, and combo)
+    """
+    featureDict = {}
+    for feature in featureList:
+        featureDict[feature] = feature.f(fstate,action,combo)
+    return featureDict
+    
 
+class Feature(object):
+    
     def f(fstate, action, combostate):
         pass
 
 class SizeofHand(Feature):
-    def __init__ (self, fstate, action, combostate):
-        self.fstate = fstate
-        self.action = action
-        self.combostate = combostate
+    
+    def f(self, fstate, action, combostate):
+        return len(fstate.hand) # remove self -- just depends on arguments
 
-    def f(self):
-        cards = 0
-        for x in self.fstate.hand:
-            cards += 1
-        return cards
-
-# Cards over 10
+# if basicValueRule.setting == True: 2, 3, 4, 5. Else, 11, 12 ,13 ,14
 class HighCount(Feature):
-    def __init__ (self, fstate, action, combostate):
-        self.fstate = fstate
-        self.action = action
-        self.combostate = combostate
-    def f(self):
+
+    def f(self, fstate, action, combostate):
+        #if greater is more powerful
         highCards = 0
-        for card in self.fstate.hand:
-            if card.value >= 10:
-                highCards += 1 
-        return highCards
-            
-# Cards under 6
+        if (fstate.state.basicValueRule.setting == True):            
+            for card in fstate.hand:
+                if card.value >= 11:
+                    highCards += 1 
+        else:
+            for card in fstate.hand:
+                if card.value <= 5:
+                    highCards += 1 
+        return highCards    
+
 class LowCount(Feature):
-    def __init__ (self, fstate, action, combostate):
-        self.fstate = fstate
-        self.action = action
-        self.combostate = combostate
-    def f(self):
+    
+    def f(self, fstate, action, combostate):
+        #if greater is more powerful
         lowCards = 0
-        for card in self.fstate.hand:
-            if card.value <= 6:
-                lowCards += 1 
+        if (fstate.state.basicValueRule.setting == True):            
+            for card in fstate.hand:
+                if card.value <= 5:
+                    lowCards += 1 
+        else:
+            for card in fstate.hand:
+                if card.value >= 11:
+                    lowCards += 1 
         return lowCards
 
-# Cards under 6
+# dosen't depend on state
 class MedCount(Feature):
-    def __init__ (self, fstate, action, combostate):
-        self.fstate = fstate
-        self.action = action
-        self.combostate = combostate
-    def f(self):
+
+    def f(self, fstate, action, combostate):
         medCards = 0
-        for card in self.fstate.hand:
-            if card.value > 6:
-                if card.value < 10:
+        for card in fstate.hand:
+            if card.value >= 6:
+                if card.value <= 10:
                     medCards += 1 
         return medCards
 
 # checker if it works with rule state
-# check against last card and make sure it works=
+# check against last card and make sure it works 
 class Illegality(Feature):
-    def __init__ (self, fstate, action, combostate):
+    def __init__ (self):
         self.checker = Checker()
-        self.fstate = fstate
-        self.action = action
-        self.combostate = combostate
 
-    def f(self):
-        actionCard = self.action
-        lastCard = self.fstate.lastCard
+    def f(self, fstate, action, combostate):
+        actionCard = action
+        lastCard = fstate.lastCard
         constraintState = combostate.state
         isLegalGivenState = self.checker.isConsistent(Notification(LEGAL, actionCard, lastCard), constraintState)
-        if isLegalGivenState:
+        if not isLegalGivenState:
             return 1
         else:
             return 0
 
-class WildValue(Feature):
-    def __init__ (self, fstate, action, combostate):
-        self.fstate = fstate
-        self.action = action
-        self.combostate = combostate
 
-    def f(self):
+## THESE NEED TO BE REDONE! -- remove init (unless it's absolutely necessary),
+#    and migrate stuff to f
+
+
+class WildValue(Feature):
+    def f(self, fstate, action, combostate):
         wildvals = 0
-        for card in self.fstate.hand:
-            if card.value == self.combostate.state.wildValueRule.setting:
+        for card in fstate.hand:
+            if card.value == combostate.state.wildValueRule.setting:
                 wildvals += 1 
         return wildvals
 
 class MajorityPercent(Feature):
-    def __init__ (self, fstate, action, combostate):
-        self.fstate = fstate
-        self.action = action
-        self.combostate = combostate
-
-    def f(self):
+    def f(self, fstate, action, combostate):
         c = 0
         s = 0
         h = 0
         d = 0
         maxsuit = 0 
-        for card in self.fstate.hand:
+        for card in fstate.hand:
             if card.suit == "C":
                 c += 1 
             if card.suit == "D":
@@ -115,78 +116,45 @@ class MajorityPercent(Feature):
             if card.suit == "H":
                 h += 1 
         maxsuit = max([c,s,h,d])
-        return (maxsuit/float(len(self.fstate.hand)))
+        return (maxsuit/float(len(fstate.hand)))
 
 class SkipCount(Feature):
-    def __init__ (self, fstate, action, combostate):
-        self.fstate = fstate
-        self.action = action
-        self.combostate = combostate
-    def f(self):
+
+    def f(self, fstate, action, combostate):
         skipCards = 0
-        for card in self.fstate.hand:
+        for card in fstate.hand:
             if card.value == combostate.effectState.skipPlayerRule.setting:
                 skipCards += 1 
         return skipCards
 
 class ScrewCount(Feature):
-    def __init__ (self, fstate, action, combostate):
-        self.fstate = fstate
-        self.action = action
-        self.combostate = combostate
-    def f(self):
+
+    def f(self, fstate, action, combostate):
         screwCards = 0
-        for card in self.fstate.hand:
+        for card in fstate.hand:
             if card.value == combostate.effectState.screwOpponentRule.setting:
                 screwCards += 1 
         return screwCards
 
 class PoisonCount(Feature):
-    def __init__ (self, fstate, action, combostate):
-        self.fstate = fstate
-        self.action = action
-        self.combostate = combostate
-    def f(self):
+    
+    def f(self, fstate, action, combostate):
         poisonCards = 0
-        for card in self.fstate.hand:
+        for card in fstate.hand:
             if card.value == combostate.effectState.poisonCardRule.setting:
                 poisonCards += 1 
         return poisonCards
 
 class WildSuit(Feature):
-    def __init__ (self, fstate, action, combostate):
-        self.fstate = fstate
-        self.action = action
-        self.combostate = combostate
-    def f(self):
+    
+    def f(self, fstate, action, combostate):
         trumpSuit = 0
         if combostate.state.wildSuitRule.setting != None:
-            for card in self.fstate.hand:
+            for card in fstate.hand:
                 if card.suit == combostate.state.wildSuitRule.setting:
                     trumpSuit += 1 
         return trumpSuit
 
-def featureDict(feature, state, action, combo ):
-    featureDict = {}
-    for feature in featureList:
-        featureDict[feature] = feature(state,action,combo).f()
-    return featureDict
-
-def R(fstate, action, combo, nextFstate):
-    if len(fstate.hand) - len(nextFstate.hand) == 1:
-        if len(nextFstate.hand) == 0:
-            # you won!
-            return 500
-        else:
-            return 1
-    if len(fstate.hand) - len(nextFstate.hand) == -1:
-        return -1
-    if len(fstate.hand) - len(nextFstate.hand) == -2:
-        return -2
-    if len(fstate.hand) == len(nextFstate.hand):
-        return 0
-    else:
-        return 0
 
     
 
@@ -197,33 +165,33 @@ def R(fstate, action, combo, nextFstate):
 # 
 # ////////////////
 
-# Fake rules gethhelelp
-bvRule = Rule('basicValueRule', 2)
-wvRule = Rule('wildValueRule', 8)
-wsRule = Rule('wildSuitRule', 'C')
-pdRule = Rule('poisonDistRule', 9)
-
-# fake effects (not inited)
-pcRule = Rule('poisonCardRule', 14)
-soRule = Rule('screwOpponentRule', 99)
-spRule = Rule('skipPlayerRule', 99)
-
-# fake state
-ruleState = State(bvRule, wvRule, wsRule, pdRule)
-effectState = EffectState(pcRule, soRule,spRule)
-
-# combined
-combostate = CombinedState(ruleState,effectState)
-
-# Cards
-card1 = Card(2, "C")
-card2 = Card(13, "H")
-card4 = Card(8, "H")
-card3 = Card(14, "C")
-
-testFstate = Fstate([card1, card3, card4], card2)
-testAction = card2
-
-print WildSuit(testFstate, testAction, combostate).f()
+# # Fake rules gethhelelp
+# bvRule = Rule('basicValueRule', 2)
+# wvRule = Rule('wildValueRule', 8)
+# wsRule = Rule('wildSuitRule', 'C')
+# pdRule = Rule('poisonDistRule', 9)
+# 
+# # fake effects (not inited)
+# pcRule = Rule('poisonCardRule', 14)
+# soRule = Rule('screwOpponentRule', 99)
+# spRule = Rule('skipPlayerRule', 99)
+# 
+# # fake state
+# ruleState = State(bvRule, wvRule, wsRule, pdRule)
+# effectState = EffectState(pcRule, soRule,spRule)
+# 
+# # combined
+# combostate = CombinedState(ruleState,effectState)
+# 
+# # Cards
+# card1 = Card(2, "C")
+# card2 = Card(13, "H")
+# card4 = Card(8, "H")
+# card3 = Card(14, "C")
+# 
+# testFstate = Fstate([card1, card3, card4], card2)
+# testAction = card2
+# 
+# print WildSuit(testFstate, testAction, combostate).f()
 
 # print featureDict([Illegality, LowCount], testFstate, testAction, combostate)

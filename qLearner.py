@@ -1,4 +1,17 @@
 from agents import *
+from features import *
+
+def calculateReward(fstate, action, combo, nextFstate):
+    
+    # 
+    if len(nextFstate.hand) == 0:
+        # you won!
+        return 15
+        
+    # losing condition?
+            
+    # if you lose cards, + reward. if you gain cards, - reward
+    return len(fstate.hand) - len(nextFstate.hand)
 
 #NOTE: Inspired by PSet 3 QLearning framework -- THANK YOU BERKELEY!
 class QLearner(Agent):
