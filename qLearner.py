@@ -19,15 +19,15 @@ class QLearner(Agent):
     state : Fstate
     action : card
     """
-    def __init__(self, name, features):
+    def __init__(self, name, features, alpha=0.01, epsilon=0.2, gamma=0.8):
         super(Agent, self).__init__(name)
         self.weights = Counter()
         self.features = features
         for feature in features:
             self.weights[feature] = -1.0
-        self.alpha = 0.01
-        self.epsilon = 0.2
-        self.discount = 0.8
+        self.alpha = alpha
+        self.epsilon = epsilon
+        self.gamma = gamma
         
         self.gameRef = None
         self.lastAction = None
@@ -54,7 +54,7 @@ class QLearner(Agent):
                 diff = reward + gamma * V(s') - Q(s, a)
                     NOTE: V(s') = max_a' Q(s', a')
         """
-        diff = reward + self.discount * self.getStateValue(nextFstate) - self.getQValue(fstate, action)
+        diff = reward + self.gamma * self.getStateValue(nextFstate) - self.getQValue(fstate, action)
 
         featuresToActivity = featureDict(self.features, fstate, action, self.combostate)
         
@@ -150,3 +150,67 @@ class QLearner(Agent):
 
 
 #
+class QPlayer(HmmAgent):
+    def __init__(self, name, features, weights, opponent):
+        super(Agent, self).__init__(name)
+        
+        #Q-Setup
+        self.opponent = opponent
+        self.features = features
+        self.weights = weights
+        assert(len(features) == len(weights))
+        
+        #HMM setup
+        self.checker = Checker()
+        self.beliefDistrib = Counter()
+        
+        self.inDangerOfSettingToNone = {}
+        self.believedEffectValues = {}
+        for t in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
+            self.believedEffectValues[t] = None
+            self.inDangerOfSettingToNone[t] = False
+            
+        
+        self.roundIllegals = 0
+        self.roundLegals = 0
+        self.validPercentByRound = []
+        
+        # initialize list of states
+        initProb = 1 / float(len(stateList))
+        for s in stateList:
+            self.beliefDistrib[s] = initProb
+            
+  # return the card from your hand you want to play
+    def chooseCard(self, lastCard, aggressive=False):
+        if not aggressive:
+            currentFstate = Fstate(self.hand[:], lastCard, self.opponent.hand[:])
+            card =  self.getBestAction(currentFstate)
+            print card
+            return card
+        else:
+            return random.choice(self.hand)
+            
+    def getLegalActions(self, state):
+        return state.hand
+            
+    def getQValue(self, fstate, action):
+        qValue = 0.0
+        featuresToActivity = featureDict(self.features, fstate, action, self.getCombinedState())
+        for feature, featureActivity in featuresToActivity.iteritems():
+            qValue = qValue + self.weights[feature] * featureActivity
+        return qValue
+    
+    def getStateValue(self, fstate):
+        return self.computeQVals(fstate, True)
+
+    def getBestAction(self, fstate):
+        return self.computeQVals(fstate, False)
+
+    def computeQVals(self, state, doReturnState): #else, return the best action
+        valuesForActions = Counter()
+        for action in self.getLegalActions(state):
+            valuesForActions[action] = self.getQValue(state,action)
+        if (doReturnState):
+            return valuesForActions[valuesForActions.argMax()]
+        else:
+            return valuesForActions.argMax()

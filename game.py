@@ -313,29 +313,30 @@ class Game(object):
 
 ##
 # Q-Learning Agent
-qBot = QLearner('qBot', [SizeofHand(), HighCount(), LowCount(), Illegality()])
+def playTest():
+    qBot = QLearner('qBot', [SizeofHand(), HighCount(), LowCount(), Illegality()])
 
-##
+    ##
 
 
-pHuman = HmmAgent("Learner")
-pBot0 = RandomAgent("A1")
-pBot2 = RandomAgent("A2")
-# pBot = LearningAgent("Learner2")
-pBot1 = RandomAgent("NaiveTests")
+    pHuman = HmmAgent("Learner")
+    pBot0 = RandomAgent("A1")
+    pBot2 = RandomAgent("A2")
+    # pBot = LearningAgent("Learner2")
+    pBot1 = RandomAgent("NaiveTests")
 
-# g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
-g = Game([qBot, pBot1], True)
-g.playGame(500)
+    # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
+    g = Game([qBot, pBot1], True)
+    g.playGame(500)
 
-# #print stats
-for player in g.players:
-    print player.name
-    print player.wins
-    if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent:
-        print np.average(player.validPercentByRound)
-    if type(player) == QLearner:
-        print player.weights
+    # #print stats
+    for player in g.players:
+        print player.name
+        print player.wins
+        if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent:
+            print np.average(player.validPercentByRound)
+        if type(player) == QLearner:
+            print player.weights
 
         
     
