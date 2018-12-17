@@ -10,7 +10,7 @@ from agents import *
 
 
 class Game(object):
-    def __init__(self, players, autogame = True, TESTCARD = None):
+    def __init__(self, players, autogame = True, TESTCARD = None, handsize=5):
         
         # constraints
         self.basicValueConstraint = constraints.BasicValueConstraint(True)
@@ -30,7 +30,7 @@ class Game(object):
         self.autogame = autogame
         
         #deck stuff
-        self.startingHandSize = 5
+        self.startingHandSize = handsize
         self.changeRuleRate = 1 #invariant -- DO NOT CHANGE
 
         self.deck = Deck() #pre-shuffled deck
@@ -328,54 +328,54 @@ class Game(object):
         
     
 
-# # tests
-# # pHuman = RandomAgent("J")
-# # # pBotw = RandomAgent("A1")
-# # # pBot2 = RandomAgent("A2")
-# # # pBot = LearningAgent("Learner2")
-# # pBot1 = HmmAgent("Learner")
+# # # tests
+# # # pHuman = RandomAgent("J")
+# # # # pBotw = RandomAgent("A1")
+# # # # pBot2 = RandomAgent("A2")
+# # # # pBot = LearningAgent("Learner2")
+# # # pBot1 = HmmAgent("Learner")
 
 
+# # #print stats
+# # for player in g.players:
+# #     print player.name
+# #     print player.wins
+# #     if type(player) == cardCounter or type(player) == RandomAgent or type(player) == HmmAgent:
+# #         try:
+# #             print g.players[1].getCombinedState()
+# #             print np.average(player.validPercentByRound)
+# #         except:
+# #             print 'div by zero'
+
+# pHuman = HmmAgent("Hmm Player2")
+# # pBotw = RandomAgent("A1")
+# # pBot2 = RandomAgent("A2")
+# # pBot = LearningAgent("Learner2")
+# pBot1 = HeuristicAgent("Heuristic Player1")
+
+# player_names = ['J', 'lerner']
+# player_wins = [[],[]]
+# player_valid = [[],[]]
+
+
+# for game in range(500):
+#     pHuman = HmmAgent("J")
+# # pBotw = RandomAgent("A1")
+# # pBot2 = RandomAgent("A2")
+# # pBot = LearningAgent("Learner2")
+#     pBot1 = cardCounter("Learner")
+#     print "game:", game
+#     g = Game([pHuman, pBot1], True)
+#     g.playGame(20)
+#     for i in range(len(g.players)):
+#         player_wins[i].append(g.players[i].wins)
+#         player_valid[i].append(np.average(g.players[i].validPercentByRound))
 # #print stats
-# for player in g.players:
-#     print player.name
-#     print player.wins
-#     if type(player) == cardCounter or type(player) == RandomAgent or type(player) == HmmAgent:
-#         try:
-#             print g.players[1].getCombinedState()
-#             print np.average(player.validPercentByRound)
-#         except:
-#             print 'div by zero'
 
-pHuman = HmmAgent("Hmm Player2")
-# pBotw = RandomAgent("A1")
-# pBot2 = RandomAgent("A2")
-# pBot = LearningAgent("Learner2")
-pBot1 = HeuristicAgent("Heuristic Player1")
-
-player_names = ['J', 'lerner']
-player_wins = [[],[]]
-player_valid = [[],[]]
-
-
-for game in range(500):
-    pHuman = HmmAgent("J")
-# pBotw = RandomAgent("A1")
-# pBot2 = RandomAgent("A2")
-# pBot = LearningAgent("Learner2")
-    pBot1 = cardCounter("Learner")
-    print "game:", game
-    g = Game([pHuman, pBot1], True)
-    g.playGame(20)
-    for i in range(len(g.players)):
-        player_wins[i].append(g.players[i].wins)
-        player_valid[i].append(np.average(g.players[i].validPercentByRound))
-#print stats
-
-for i in range(2):
-    print player_names[i]
-    print np.sum(player_wins[i])
-    print np.mean(player_valid[i])
+# for i in range(2):
+#     print player_names[i]
+#     print np.sum(player_wins[i])
+#     print np.mean(player_valid[i])
         
 
 
