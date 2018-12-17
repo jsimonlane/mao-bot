@@ -115,8 +115,11 @@ class QLearner(Agent):
             #this is NOT our first move
             if self.lastFstate != None:
                 # calcuate the reward and update
-                reward = calculateReward(self.lastFstate, self.lastAction, self.combostate, currentFstate)
-                self.update(self.lastFstate, self.lastAction, currentFstate, reward)            
+                if (self.lastFstate != None and self.lastAction != None and currentFstate != None):
+                    reward = calculateReward(self.lastFstate, self.lastAction, self.combostate, currentFstate)
+                    self.update(self.lastFstate, self.lastAction, currentFstate, reward)
+                else:
+                    print "rare corner case"
             
             self.lastFstate = currentFstate
             self.lastAction = cardToPlay
