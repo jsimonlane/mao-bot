@@ -47,6 +47,21 @@ class Game(object):
             self.heuristicMode = True
             self.testCard = TESTCARD 
         
+    def deliverCombostate(self):
+        bVal = Rule(BASICVALUE, self.basicValueConstraint.greater)
+        wVal = Rule(WILDVALUE, self.wildValueConstraint.wildValue)
+        wSuit = Rule(WILDSUIT, self.wildSuitEffect.wildSuit)
+        pDist = Rule(POISONDIST, self.poisonDistanceConstraint.dist)
+        
+        pCard = Rule(POISONCARD, self.poisonCardEffect.value)
+        skip = Rule(SKIPPLAYER, self.skipPlayerEffect.activatingValue)
+        screw = Rule(SCREWOPPONENT, self.screwOpponentEffect.activatingValue)
+        
+        state = State(bVal, wVal, wSuit, pDist)
+        effectState = EffectState(pCard, screw, skip)
+        
+        return CombinedState(state, effectState)
+        
     def makeModification(self, ruleTuple):
         rule = ruleTuple.rule
         setting = ruleTuple.setting

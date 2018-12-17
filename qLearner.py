@@ -129,7 +129,7 @@ class QLearner(Agent):
         if notification.type == NEWROUND:
             
             self.gameRef = game
-            self.combostate = game.getCombinedState()
+            self.combostate = game.deliverCombostate()
             self.lastAction = None
             self.lastFstate = None
             
