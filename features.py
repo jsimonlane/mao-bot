@@ -47,6 +47,20 @@ class LowCount(Feature):
                 lowCards += 1 
         return lowCards
 
+# Cards under 6
+class LowCount(Feature):
+    def __init__ (self, fstate, action, combostate):
+        self.fstate = fstate
+        self.action = action
+        self.combostate = combostate
+    def f(self):
+        medCards = 0
+        for card in self.fstate.hand:
+            if card.value > 6:
+                if card.value < 10:
+                    medCards += 1 
+        return medCards
+
 # checker if it works with rule state
 # check against last card and make sure it works=
 class Illegality(Feature):
@@ -73,16 +87,37 @@ class WildValue(Feature):
         self.combostate = combostate
 
     def f(self):
-        actionCard = self.action
-        lastCard = self.fstate.lastCard
-        constraintState = combostate.state
-        isLegalGivenState = self.checker.isConsistent(Notification(LEGAL, actionCard, lastCard), constraintState)
-        if isLegalGivenState:
-            return 1
-        else:
-            return 0
+        wildvals = 0
+        for card in self.fstate.hand:
+            if card.value == self.combostate.state.wildValueRule.setting:
+                wildvals += 1 
+        return wildvals
 
-def featureDict(featureList, state, action, combo ):
+class MajorityPercent(Feature):
+    def __init__ (self, fstate, action, combostate):
+        self.fstate = fstate
+        self.action = action
+        self.combostate = combostate
+
+    def f(self):
+        c = 0
+        s = 0
+        h = 0
+        d = 0
+        maxsuit = 0 
+        for card in self.fstate.hand:
+            if card.suit == "C":
+                c += 1 
+            if card.suit == "D":
+                d += 1 
+            if card.suit == "S":
+                s += 1 
+            if card.suit == "H":
+                h += 1 
+        maxsuit = max([c,s,h,d])
+        return (maxsuit/float(len(self.fstate.hand)))
+
+def featureDict(feature, state, action, combo ):
     featureDict = {}
     for feature in featureList:
         featureDict[feature] = feature(state,action,combo).f()
