@@ -241,6 +241,7 @@ class Game(object):
             initialCard = self.getCardFromDeck()
             self.pile.append(initialCard)
             self.lastCard = initialCard
+            self.notifyAll(Notification(NEWROUND, None, None))
             
             for player in self.players:
                 # draw 5 cards

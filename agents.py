@@ -753,7 +753,7 @@ class cardCounter(HmmAgent):
             self.beliefDistrib.normalize()
             
 
-        if self.wonLast == 1:
+        if self.wonLast == 1 and notification.type != NEWROUND:
             self.discard = [notification.lastCard]
             self.cardsAtLarge = []
             self.opHandSize = 0
