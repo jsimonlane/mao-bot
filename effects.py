@@ -97,7 +97,7 @@ class PoisonCardEffect(Effect):
     
     def modify(self, dist):
         if (dist >= 2 or dist <= 14) or dist == None:
-            self.dist = dist
+            self.value = dist
         else:
             print "invalid setting for rule PoisonCardConstraint"
 
