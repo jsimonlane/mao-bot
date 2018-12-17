@@ -17,6 +17,7 @@ POISONCARD = 6
 SCREWOPPONENT = 7
 SKIPPLAYER = 8
 
+
 # Notification Code for reseting deck from pile
 DECKRESET = 10
 
