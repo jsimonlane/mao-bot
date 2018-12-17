@@ -184,9 +184,10 @@ class QPlayer(HmmAgent):
     def chooseCard(self, lastCard, aggressive=False):
         if not aggressive:
             currentFstate = Fstate(self.hand[:], lastCard, self.opponent.hand[:])
-            card =  self.getBestAction(currentFstate)
-            print card
-            return card
+            if random.random() > 0.975: #add stochastism to avoid certain rare corner cases
+                return self.getBestAction(currentFstate)
+            else:
+                return random.choice(self.hand)
         else:
             return random.choice(self.hand)
             
@@ -194,11 +195,11 @@ class QPlayer(HmmAgent):
         return state.hand
             
     def getQValue(self, fstate, action):
-        qValue = 0.0
+        qVal = 0.0
         featuresToActivity = featureDict(self.features, fstate, action, self.getCombinedState())
         for feature, featureActivity in featuresToActivity.iteritems():
-            qValue = qValue + self.weights[feature] * featureActivity
-        return qValue
+            qVal = qVal + self.weights[feature] * featureActivity
+        return qVal
     
     def getStateValue(self, fstate):
         return self.computeQVals(fstate, True)
