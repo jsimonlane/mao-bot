@@ -18,11 +18,16 @@ SCREWOPPONENT = 7
 SKIPPLAYER = 8
 
 
+# Notification Code for reseting deck from pile
+DECKRESET = 10
+
 State = namedtuple('State', ['basicValueRule', 'wildValueRule', 'wildSuitRule', 'poisonDistRule'])
 
 EffectState = namedtuple('EffectState', ['poisonCardRule', 'screwOpponentRule', 'skipPlayerRule'])
 
 CombinedState = namedtuple('CombinedState', ['state', 'effectState'])
+
+Fstate = namedtuple('Fstate', ['hand', 'lastCard'])
 
 #initialize a list of states
 stateList = []
