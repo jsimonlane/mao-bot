@@ -5,8 +5,9 @@ def calculateReward(fstate, action, combo, nextFstate):
     if len(nextFstate.hand) == 0:
         # you won!
         return 15
-        
-    # losing condition?
+    elif len(nextFstate.opponentHand) == 0:
+        # you lost!
+        return -15
             
     # if you lose cards, + reward. if you gain cards, - reward
     return len(fstate.hand) - len(nextFstate.hand)
@@ -30,18 +31,19 @@ class QLearner(Agent):
         self.lastAction = None
         self.lastFstate = None
         self.combostate = None
+        self.opponent = None
     
-    def getQValue(self, state, action):
+    def getQValue(self, fstate, action):
         """
         Q(s, a) = w_1 f_1 + w_2 f_2 + ... + w_n f_n
         """
         qValue = 0.0
-        featuresToActivity = featureDict(self.features)
+        featuresToActivity = featureDict(self.features, fstate, action, self.combostate)
         for feature, featureActivity in featuresToActivity.iteritems():
             qValue = qValue + self.weights[feature] * featureActivity
         return qValue
     
-    def update(self, state, action, nextState, reward):
+    def update(self, fstate, action, nextFState, reward):
         """
         updates the weights, in response to an episode
         
@@ -50,23 +52,23 @@ class QLearner(Agent):
                 diff = reward + gamma * V(s') - Q(s, a)
                     NOTE: V(s') = max_a' Q(s', a')
         """
-        diff = reward + self.discount * self.getStateValue(nextState) - self.getQValue(state, action)
+        diff = reward + self.discount * self.getStateValue(nextFState) - self.getQValue(fstate, action)
 
-        featuresToActivity = featureDict(self.features)
+        featuresToActivity = featureDict(self.features, fstate, action, self.combostate)
         for feature, featureActivity in features.iteritems():
             self.weights[feature] = self.weights[feature] + self.alpha * diff * featureActivity
 
-    def getStateValue(self, state):
+    def getStateValue(self, fstate):
         """
         Given a state, tells you the value of that state -- primarily used in diff
         """
-        return self.computeQVals(state, True)
+        return self.computeQVals(fstate, True)
 
-    def getBestAction(self, state):
+    def getBestAction(self, fstate):
         """
         Given a state, tells you the best action you can take
         """
-        return self.computeQVals(state, False)
+        return self.computeQVals(fstate, False)
 
     def computeQVals(self, state, doReturnState): #else, return the best action
         """
@@ -93,7 +95,7 @@ class QLearner(Agent):
     def chooseCard(self, lastCard, aggressive=False):
         #place where we set a state
         if not aggressive:
-            currentFstate = Fstate(self.hand[:], lastCard)
+            currentFstate = Fstate(self.hand[:], lastCard, self.opponent.hand)
             # choose a card
             cardToPlay = random.choice(self.hand)
             
@@ -112,19 +114,25 @@ class QLearner(Agent):
 
     def notify(self, notification, game):
         # if I just played a card
-        if notification.type == NEWGAME:
+        if notification.type == NEWROUND:
             
             self.gameRef = game
             self.combostate = game.getCombinedState()
             self.lastAction = None
             self.lastFstate = None
             
+            # set the opponent
+            for player in game.players:
+                if player != self:
+                    self.opponent = player
+                    break
+            
         if notification.type == WON:
             self.gameRef = None # to prevent circular reference counting
             
             #if we won
             if game.players[game.activePlayer] == self:
-                finalFstate = Fstate(self.hand[:], game.lastCard)
+                finalFstate = Fstate(self.hand[:], game.lastCard, self.opponent.hand)
                 reward = calculateReward(self.lastFstate, self.lastAction, self.combostate, self.currentFstate)
                 self.update(self.lastFstate, self.lastAction, finalFstate, reward) 
             # else, someone else won
