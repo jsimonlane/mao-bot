@@ -173,6 +173,13 @@ class TwoCount(Feature):
                 twos += 1 
         return twos
 
+class PlayScrew(Feature):
+    def f(self, fstate, action, combostate):
+        return action.value == combostate.effectState.screwOpponentRule.setting
+        
+class PlaySkip(Feature):
+    def f(self, fstate, action, combostate):
+        return action.value == combostate.effectState.skipPlayerRule.setting
 
 class OpponentCards(Feature):
     
