@@ -312,27 +312,27 @@ class Game(object):
 
         
     
-# tests
-<<<<<<< HEAD
-pHuman = HmmAgent("Hmm Player2")
-# pBotw = RandomAgent("A1")
-# pBot2 = RandomAgent("A2")
-# pBot = LearningAgent("Learner2")
-pBot1 = HeuristicAgent("Heuristic Player1")
-=======
-# pHuman = RandomAgent("J")
+# # tests
+# <<<<<<< HEAD
+# pHuman = HmmAgent("Hmm Player2")
 # # pBotw = RandomAgent("A1")
 # # pBot2 = RandomAgent("A2")
 # # pBot = LearningAgent("Learner2")
-# pBot1 = HmmAgent("Learner")
->>>>>>> 5d5a053a581da54fc37d92c567bcf5f2e1776677
+# pBot1 = HeuristicAgent("Heuristic Player1")
+# =======
+# # pHuman = RandomAgent("J")
+# # # pBotw = RandomAgent("A1")
+# # # pBot2 = RandomAgent("A2")
+# # # pBot = LearningAgent("Learner2")
+# # pBot1 = HmmAgent("Learner")
+# >>>>>>> 5d5a053a581da54fc37d92c567bcf5f2e1776677
 
-# g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
+# # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
 
-<<<<<<< HEAD
-g.playGame(1000)
-=======
->>>>>>> 5d5a053a581da54fc37d92c567bcf5f2e1776677
+# <<<<<<< HEAD
+# g.playGame(1000)
+# =======
+# >>>>>>> 5d5a053a581da54fc37d92c567bcf5f2e1776677
 
 # #print stats
 # for player in g.players:
