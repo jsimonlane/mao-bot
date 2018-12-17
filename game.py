@@ -143,6 +143,8 @@ class Game(object):
                 self.pile = []
                 assert( origLen == len(self.deck.cards) ) #copying trips me out
                 self.deck.shuffle()
+                notification = Notification(DECKRESET, None, None)
+                self.notifyAll(notification)
                 return self.getCardFromDeck() #recurse, try to get another card
         else:
             return card
@@ -311,28 +313,62 @@ class Game(object):
         
     
 # tests
+<<<<<<< HEAD
 pHuman = HmmAgent("Hmm Player2")
 # pBotw = RandomAgent("A1")
 # pBot2 = RandomAgent("A2")
 # pBot = LearningAgent("Learner2")
 pBot1 = HeuristicAgent("Heuristic Player1")
+=======
+# pHuman = RandomAgent("J")
+# # pBotw = RandomAgent("A1")
+# # pBot2 = RandomAgent("A2")
+# # pBot = LearningAgent("Learner2")
+# pBot1 = HmmAgent("Learner")
+>>>>>>> 5d5a053a581da54fc37d92c567bcf5f2e1776677
 
 # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
-g = Game([pHuman, pBot1], True)
 
+<<<<<<< HEAD
 g.playGame(1000)
+=======
+>>>>>>> 5d5a053a581da54fc37d92c567bcf5f2e1776677
+
+# #print stats
+# for player in g.players:
+#     print player.name
+#     print player.wins
+#     if type(player) == cardCounter or type(player) == RandomAgent or type(player) == HmmAgent:
+#         try:
+#             print g.players[1].getCombinedState()
+#             print np.average(player.validPercentByRound)
+#         except:
+#             print 'div by zero'
 
 
+player_names = ['J', 'lerner']
+player_wins = [[],[]]
+player_valid = [[],[]]
+
+
+for game in range(500):
+    pHuman = HmmAgent("J")
+# pBotw = RandomAgent("A1")
+# pBot2 = RandomAgent("A2")
+# pBot = LearningAgent("Learner2")
+    pBot1 = cardCounter("Learner")
+    print "game:", game
+    g = Game([pHuman, pBot1], True)
+    g.playGame(20)
+    for i in range(len(g.players)):
+        player_wins[i].append(g.players[i].wins)
+        player_valid[i].append(np.average(g.players[i].validPercentByRound))
 #print stats
-for player in g.players:
-    print player.name
-    print player.wins
-    if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent:
-        try:
-            print g.players[1].getCombinedState()
-            print np.average(player.validPercentByRound)
-        except:
-            print 'div by zero'
+
+for i in range(2):
+    print player_names[i]
+    print np.sum(player_wins[i])
+    print np.mean(player_valid[i])
         
 
 
