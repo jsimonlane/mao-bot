@@ -7,6 +7,7 @@ import time
 
 import copy
 from agents import *    
+from qLearner import *
 
 
 class Game(object):
@@ -293,14 +294,22 @@ class Game(object):
 # Commenting out for use in tests.py
 # 
 # \\\\\\\\\
+
+##
+# Q-Learning Agent
+qBot = QLearner('qBot', [SizeofHand(), HighCount(), LowCount(), Illegality()])
+
+##
+
+
 pHuman = HmmAgent("Learner")
-# pBotw = RandomAgent("A1")
-# pBot2 = RandomAgent("A2")
+pBot0 = RandomAgent("A1")
+pBot2 = RandomAgent("A2")
 # pBot = LearningAgent("Learner2")
 pBot1 = RandomAgent("NaiveTests")
 
 # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
-g = Game([pHuman, pBot1], True)
+g = Game([qBot, pBot1], True)
 g.playGame(100)
 
 # #print stats

@@ -166,32 +166,32 @@ class WildSuit(Feature):
 # ////////////////
 
 # Fake rules gethhelelp
-bvRule = Rule('basicValueRule', 2)
-wvRule = Rule('wildValueRule', 8)
-wsRule = Rule('wildSuitRule', 'C')
-pdRule = Rule('poisonDistRule', 9)
-
-# fake effects (not inited)
-pcRule = Rule('poisonCardRule', 14)
-soRule = Rule('screwOpponentRule', 99)
-spRule = Rule('skipPlayerRule', 99)
-
-# fake state
-ruleState = State(bvRule, wvRule, wsRule, pdRule)
-effectState = EffectState(pcRule, soRule,spRule)
-
-# combined
-combostate = CombinedState(ruleState,effectState)
-
-# Cards
-card1 = Card(2, "C")
-card2 = Card(13, "H")
-card4 = Card(8, "H")
-card3 = Card(14, "C")
-
-testFstate = Fstate([card1, card3, card4], card2)
-testAction = card2
-
-# print WildSuit(testFstate, testAction, combostate).f()
-
-print featureDict([MajorityPercent(), PoisonCount()], testFstate, testAction, combostate)
+# bvRule = Rule('basicValueRule', 2)
+# wvRule = Rule('wildValueRule', 8)
+# wsRule = Rule('wildSuitRule', 'C')
+# pdRule = Rule('poisonDistRule', 9)
+# 
+# # fake effects (not inited)
+# pcRule = Rule('poisonCardRule', 14)
+# soRule = Rule('screwOpponentRule', 99)
+# spRule = Rule('skipPlayerRule', 99)
+# 
+# # fake state
+# ruleState = State(bvRule, wvRule, wsRule, pdRule)
+# effectState = EffectState(pcRule, soRule,spRule)
+# 
+# # combined
+# combostate = CombinedState(ruleState,effectState)
+# 
+# # Cards
+# card1 = Card(2, "C")
+# card2 = Card(13, "H")
+# card4 = Card(8, "H")
+# card3 = Card(14, "C")
+# 
+# testFstate = Fstate([card1, card3], card2, [card4])
+# testAction = card2
+# 
+# # print WildSuit(testFstate, testAction, combostate).f()
+# 
+# print featureDict([MajorityPercent(), PoisonCount()], testFstate, testAction, combostate)

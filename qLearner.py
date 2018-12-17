@@ -1,4 +1,4 @@
-lastActionfrom agents import *
+from agents import *
 from features import *
 
 def calculateReward(fstate, action, combo, nextFstate):
@@ -26,6 +26,8 @@ class QLearner(Agent):
         for feature in features:
             self.weights[feature] = 0
             
+        self.alpha = 0.1
+        self.epsilon = 0.2
         
         self.gameRef = None
         self.lastAction = None
@@ -91,13 +93,23 @@ class QLearner(Agent):
         return state.hand
         # return a list of legal actions! -- ie, cards that can be played
     
+    def getAction(self, state):
+        # Pick Action
+        legalActions = self.getLegalActions(state)
+        randomAction = random.choice(legalActions)
+        bestAction = self.getBestAction(state)
+
+        if random.random() < self.epsilon:
+            return randomAction
+        else:
+            return bestAction
 
     def chooseCard(self, lastCard, aggressive=False):
         #place where we set a state
         if not aggressive:
-            currentFstate = Fstate(self.hand[:], lastCard, self.opponent.hand)
+            currentFstate = Fstate(self.hand[:], lastCard, self.opponent.hand[:])
             # choose a card
-            cardToPlay = random.choice(self.hand)
+            cardToPlay = self.getAction()
             
             #this is NOT our first move
             if self.lastFstate != None:
@@ -128,16 +140,11 @@ class QLearner(Agent):
                     break
             
         if notification.type == WON:
+            finalFstate = Fstate(self.hand[:], game.lastCard, self.opponent.hand[:])
+            reward = calculateReward(self.lastFstate, self.lastAction, self.combostate, self.currentFstate)
+            self.update(self.lastFstate, self.lastAction, finalFstate, reward) 
+
             self.gameRef = None # to prevent circular reference counting
-            
-            #if we won
-            if game.players[game.activePlayer] == self:
-                finalFstate = Fstate(self.hand[:], game.lastCard, self.opponent.hand)
-                reward = calculateReward(self.lastFstate, self.lastAction, self.combostate, self.currentFstate)
-                self.update(self.lastFstate, self.lastAction, finalFstate, reward) 
-            # else, someone else won
-            else:
-                
             
 
 
