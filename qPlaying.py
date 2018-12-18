@@ -23,9 +23,9 @@ def play1():
             print np.average(player.validPercentByRound)
 
 def play2():
-    pBot2 = RandomAgent("Random")
+    pBot2 = HmmAgent("Hmm")
     # qBot1 = RandomAgent("random")
-    qBot1 = QPlayer('qPlayer', featureSet2, pickle.loads(trainingWeights2), pBot2) #default values
+    qBot1 = QPlayer('qPlayer', featureSet5, pickle.loads(trainingWeights5), pBot2) #default values
     
     random.seed(183)
     g = Game([qBot1, pBot2], True)
@@ -38,4 +38,23 @@ def play2():
         if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent or type(player) == QPlayer:
             print np.average(player.validPercentByRound)
 
-play2()
+
+def play3():
+    pBot2 = HmmAgent("Hmm")
+    # qBot1 = RandomAgent("random")
+    # qBot1 = QPlayer('qPlayer', featureSet5, pickle.loads(trainingWeights5), pBot2) #default values
+    qBot1 = QCheater("QCheater", featureSet4, pickle.loads(trainingWeights7))
+    
+    random.seed(183)
+    g = Game([qBot1, pBot2], True)
+    
+    g.playGame(100)
+
+    # #print stats
+    for player in g.players:
+        print player.name
+        print player.wins
+        if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent or type(player) == QPlayer:
+            print np.average(player.validPercentByRound)
+            
+play3()

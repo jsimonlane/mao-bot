@@ -79,7 +79,58 @@ def train5():
     except:
         printGameStats(g)
         
-train5()
+# train5()
+
+featureSet6 = featureSet3
+def train6():
+    weights = Counter()
+    random.seed(182)
+    for i in range(20):
+        try:
+            qBot1 = QLearner('QLearner', featureSet5) #default values
+            pBot2 = HmmAgent("Hmm")
+            if i != 0:
+                qBot1.weights = weights
+            
+            g = Game([qBot1, pBot2], True)
+            g.playGame(10000)
+            printGameStats(g)
+        except:
+            weights = qBot1.weights
+            print
+            printGameStats(g)
+            continue
+            
+# shows evolution of files
+featureSet7 = featureSet3
+def train7():
+    weightList = []
+    weights = Counter()
+    random.seed(182)
+    for i in range(20):
+        try:
+            qBot1 = QLearner('QLearner', featureSet5) #default values
+            pBot2 = HmmAgent("Hmm")
+            if i != 0:
+                qBot1.weights = weights
+            
+            g = Game([qBot1, pBot2], True)
+            g.playGame(3000)
+            printGameStats(g)
+            weightList.append(weights)
+        except:
+            weights = qBot1.weights
+            print "iteration", i
+            weightList.append(weights)
+            printGameStats(g)
+            continue
+    print "weight list:"
+    pickled = pickle.dumps(weightList)
+    f= open("weightChange.txt","w+")
+    f.write(pickled)
+    f.close()
+    
+train7()
 
 # see output.py for the pickled output
 
