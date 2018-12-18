@@ -7,6 +7,7 @@ import time
 
 import copy
 from agents import *    
+from qLearner import *
 
 
 class Game(object):
@@ -45,7 +46,7 @@ class Game(object):
         if TESTCARD:
             self.heuristicMode = True
             self.testCard = TESTCARD 
-    
+        
     def deliverCombostate(self):
         bVal = Rule(BASICVALUE, self.basicValueConstraint.greater)
         wVal = Rule(WILDVALUE, self.wildValueConstraint.wildValue)
@@ -256,6 +257,7 @@ class Game(object):
             initialCard = self.getCardFromDeck()
             self.pile.append(initialCard)
             self.lastCard = initialCard
+            self.notifyAll(Notification(NEWROUND, None, None))
             
             for player in self.players:
                 # draw 5 cards
@@ -293,12 +295,13 @@ class Game(object):
     
     def playGame(self, numRounds=10):
         winner = 0
+        roundPrint = 16
         for i in range(numRounds):
-            if self.round % 1024 == 0:
+            if self.round % roundPrint == 0:
                 t0 = time.time()
             winner = self.playRound(winner)
             
-            if self.round % 1024 == 0:
+            if self.round % roundPrint == 0:
                 t1 = time.time()
                 print "round", self.round, t1-t0
 
@@ -307,51 +310,43 @@ class Game(object):
 # Commenting out for use in tests.py
 # 
 # \\\\\\\\\
-# pHuman = HmmAgent("Learner")
-# # pBotw = RandomAgent("A1")
-# # pBot2 = RandomAgent("A2")
-# # pBot = LearningAgent("Learner2")
-# pBot1 = HeuristicAgent("NaiveTests")
 
-# # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
-# g = Game([pHuman, pBot1], True)
-# g.playGame(100)
+##
+# Q-Learning Agent
+def playTest():
+    qBot = QLearner('qBot', [SizeofHand(), HighCount(), LowCount(), Illegality()])
 
-# #print stats
-# for player in g.players:
-#     print "Card Tested: " + str(TESTCARD)
-#     print player.name
-#     print player.wins
-#     if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent:
-#         print np.average(player.validPercentByRound)
+    ##
+
+
+    pHuman = HmmAgent("Learner")
+    pBot0 = RandomAgent("A1")
+    pBot2 = RandomAgent("A2")
+    # pBot = LearningAgent("Learner2")
+    pBot1 = RandomAgent("NaiveTests")
+
+    # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
+    g = Game([qBot, pBot1], True)
+    g.playGame(500)
+
+    # #print stats
+    for player in g.players:
+        print player.name
+        print player.wins
+        if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent:
+            print np.average(player.validPercentByRound)
+        if type(player) == QLearner:
+            print player.weights
 
         
     
-
-# # # tests
-# # # pHuman = RandomAgent("J")
-# # # # pBotw = RandomAgent("A1")
-# # # # pBot2 = RandomAgent("A2")
-# # # # pBot = LearningAgent("Learner2")
-# # # pBot1 = HmmAgent("Learner")
-
-
-# # #print stats
-# # for player in g.players:
-# #     print player.name
-# #     print player.wins
-# #     if type(player) == cardCounter or type(player) == RandomAgent or type(player) == HmmAgent:
-# #         try:
-# #             print g.players[1].getCombinedState()
-# #             print np.average(player.validPercentByRound)
-# #         except:
-# #             print 'div by zero'
-
-# pHuman = HmmAgent("Hmm Player2")
+# tests
+# pHuman = RandomAgent("J")
 # # pBotw = RandomAgent("A1")
 # # pBot2 = RandomAgent("A2")
 # # pBot = LearningAgent("Learner2")
-# pBot1 = HeuristicAgent("Heuristic Player1")
+# pBot1 = HmmAgent("Learner")
+
 
 # player_names = ['J', 'lerner']
 # player_wins = [[],[]]
