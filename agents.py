@@ -580,6 +580,15 @@ class HeuristicAgent(HmmAgent):
         initProb = 1 / float(len(stateList))
         for s in stateList:
             self.beliefDistrib[s] = initProb
+
+        self.numStates = []
+        self.notificationMatch = [0]
+        self.possibleStates = 0
+        for state in self.beliefDistrib:
+            if self.beliefDistrib[state] > 0:
+                self.possibleStates += 1
+        self.numStates.append(self.possibleStates)
+        
     # a naive heuristic to judge the best card to play
     def naiveHeuristic(self, legalCards, effects):
         # basic progression of card strength from best to worst:
@@ -630,7 +639,7 @@ class HeuristicAgent(HmmAgent):
             return random.choice(self.hand)
 
 # Card Counting Agent that plays expectimax type solution
-class cardCounter(HmmAgent):
+class CardCounter(HmmAgent):
     def __init__(self, name):
         super(Agent, self).__init__(name)
         
@@ -653,6 +662,14 @@ class cardCounter(HmmAgent):
         for s in stateList:
             self.beliefDistrib[s] = initProb
         
+        self.numStates = []
+        self.notificationMatch = [0]
+        self.possibleStates = 0
+        for state in self.beliefDistrib:
+            if self.beliefDistrib[state] > 0:
+                self.possibleStates += 1
+        self.numStates.append(self.possibleStates)
+
         self.wonLast = 1
         self.justShuffled = 0
         self.discard = []
@@ -692,6 +709,17 @@ class cardCounter(HmmAgent):
             #reset 
             for t in [POISONCARD, SCREWOPPONENT, SKIPPLAYER]:
                 self.inDangerOfSettingToNone[t] = False
+
+
+            youWon = 0
+            if notification.attemptedCard == self:
+                youWon = 1
+            self.notificationMatch.append(notification.type + youWon)
+            self.possibleStates = 0
+            for state in self.beliefDistrib:
+                if self.beliefDistrib[state] > 0:
+                    self.possibleStates += 1
+            self.numStates.append(self.possibleStates)
 
             ## super wacky -- we need know if we won the game, so we put "player" as "attemptedCard"
             # immutable names is mostly great. Except when it isn't
@@ -751,6 +779,12 @@ class cardCounter(HmmAgent):
             self.inDangerOfSettingToNone[type] = False     
             
         elif notification.type in [LEGAL, PENALTY]:
+            self.notificationMatch.append(notification.type)
+            self.possibleStates = 0
+            for state in self.beliefDistrib:
+                if self.beliefDistrib[state] > 0:
+                    self.possibleStates += 1
+            self.numStates.append(self.possibleStates)
             if notification.type == LEGAL:
                 res = True
                 
