@@ -1,5 +1,6 @@
 from game import *
 import pickle
+import copy
 
  #  _______        _       _               __ 
  # |__   __|      (_)     (_)             /_ |
@@ -117,11 +118,11 @@ def train7():
             g = Game([qBot1, pBot2], True)
             g.playGame(3000)
             printGameStats(g)
-            weightList.append(weights)
+            weightList.append(copy.deepcopy(weights))
         except:
             weights = qBot1.weights
             print "iteration", i
-            weightList.append(weights)
+            weightList.append(copy.deepcopy(weights))
             printGameStats(g)
             continue
     print "weight list:"
