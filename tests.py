@@ -102,7 +102,7 @@ else:
                         print "something went wrong with the qplaying agent"
         else: 
             try:
-                g = Game(gameAgents, False)
+                g = Game(gameAgents, True)
                 g.playGame(int(numGames))
                 for player in g.players:
                     print player.name
