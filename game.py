@@ -341,21 +341,23 @@ def playTest():
 
         
     
-# tests
-# pHuman = RandomAgent("J")
+# # tests
+# pHuman = HmmAgent("J")
 # # pBotw = RandomAgent("A1")
 # # pBot2 = RandomAgent("A2")
 # # pBot = LearningAgent("Learner2")
+
 # pBot1 = HmmAgent("Learner")
 
 
-# <<<<<<< HEAD
+
 # # # tests
 pHuman = HmmAgent("J")
 # pBotw = RandomAgent("A1")
 # pBot2 = RandomAgent("A2")
 # pBot = LearningAgent("Learner2")
 pBot1 = CardCounter("Learner")
+
 
 g = Game([pHuman, pBot1], True)
 g.playGame(200)

@@ -2,6 +2,8 @@ import subprocess
 import sys
 import random
 from game import *
+import pickle
+from qPlaying import *
 
 random.seed(22)
 playStyle = None
@@ -25,10 +27,10 @@ if len(sys.argv) >= 7:
 
 def usage():
     print "A simple way to test the features of our agents"
-    print "USAGE: tests.py [playstyle] [# of games] [agent1] [agent 2] [agent3] [agent 4]\n MANDATORY ARGS: \n playstyle:       [montecarlo] - Montecarlo test on an agent starting with each of 14 cards \n                  [playing] - Runs two or more agents against each other \n                  [all] - a quick example of all current testing\n"
+    print "USAGE: tests.py [output] [# of games] [agent1] [agent 2] [agent3] [agent 4]\n MANDATORY ARGS: \n playstyle:       [on] - Turns on terminal output\n                  [off] - Turns off terminal output \n"
     print " # of games:            an integer number of games to play\n"
     # CHANGE WITH NEW AGENTS!
-    print " OPTIONAL ARGS: \n  agent1:         [human] - Real Player \n                  [hmm] - Hidden Markov AI agent\n                  [simple] - Simple AI agent\n                  [cardcounter] - Expectimax Strategy Agent"
+    print " OPTIONAL ARGS: \n  agent1:         [human] - Real Player \n                  [hmm] - Hidden Markov AI agent\n                  [simple] - Simple AI agent\n                  [cardcounter] - Expectimax Strategy Agent\n                  [heuristic] - Naive Heuristic Agent"
     print "  agent2:         Same options as agent1 "
     print "  agent3:         Same options as agent1 "
     print "  agent4:         Same options as agent1 "
@@ -47,12 +49,15 @@ def cliToPlayer(cli):
         elif agent == "simple":
             namestr = "Simple AI Player%s" % (i,)
             agents.append(LearningAgent(namestr))
+        elif agent == "heuristic":
+            namestr = "Heuristic AI Player%s" % (i,)
+            agents.append(HeuristicAgent(namestr))
         elif agent == "cardcounter":
             namestr = "Expectimax Player%s" % (i,)
             agents.append(cardCounter(namestr))
         elif agent == "qlearn":
             namestr = "RL Player%s" % (i,)
-            agents.append(qLearner(namestr))
+            agents.append("CALLQPLAY")
         elif agent == None:
             continue
         else:
@@ -68,39 +73,41 @@ elif playStyle == None:
 else:
     cli = [agent1, agent2, agent3, agent4]
     gameAgents = cliToPlayer(cli)
-    if playStyle == "playing":
-        try:
-            g = Game(gameAgents, True)
-            g.playGame(int(numGames))
-            for player in g.players:
-                print player.name
-                print player.wins
-                if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent:
-                    print np.average(player.validPercentByRound)
-        except:
-            print "Something went wrong, be sure to check your agents and number of games "
-    elif playStyle == "montecarlo":
-        # @TD
-        print "Montecarlo requested"
-    elif playStyle == "all":
-        print "Human Agent Vs AI"
-        agent1 = HumanAgent("Human Player1")
-        agent2 = qLearner("Q-Learned Player")
-        g = Game([agent1, agent2], False)
-        g.playGame(int(numgames))
-        print "AI vs AI"
-        agent1 = qLearner("Q-Learned Player1")
-        agent2 = qLearner("Q-Learned Player2")
-        g = Game([agent1, agent2], True)
-        g.playGame(int(numGames))
-        for player in g.players:
-                print player.name
-                print player.wins
-        print "AI VS Adverserial"
-        agent1 = qLearner("Q-Learned Player1")
-        agent2 = cardCounter("Q-Learned Player2")
-        g = Game([agent1, agent2], True)
-        g.playGame(int(numGames))
-        for player in g.players:
-                print player.name
-                print player.wins
+    if playStyle == "on":
+        if "CALLQPLAY" in gameAgents:
+            for agent in gameAgents:
+                if agent != "CALLQPLAY":
+                    try:
+                        play2(agent)
+                    except:
+                        print "something went wrong with the qplaying agent"
+        else: 
+            try:
+                g = Game(gameAgents, False)
+                g.playGame(int(numGames))
+                for player in g.players:
+                    print player.name
+                    print player.wins
+                    if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent:
+                        print np.average(player.validPercentByRound)
+            except:
+                print "Something went wrong, be sure to check your agents and number of games "
+    elif playStyle == "off":
+        if "CALLQPLAY" in gameAgents:
+            for agent in gameAgents:
+                if agent != "CALLQPLAY":
+                    try:
+                        play2(agent)
+                    except:
+                        print "something went wrong with the qplaying agent"
+        else: 
+            try:
+                g = Game(gameAgents, False)
+                g.playGame(int(numGames))
+                for player in g.players:
+                    print player.name
+                    print player.wins
+                    if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent:
+                        print np.average(player.validPercentByRound)
+            except:
+                print "Something went wrong, be sure to check your agents and number of games "
