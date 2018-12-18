@@ -34,7 +34,7 @@ class HighCount(Feature):
     def f(self, fstate, action, combostate):
         #if greater is more powerful
         highCards = 0
-        if (fstate.state.basicValueRule.setting == True):            
+        if (combostate.state.basicValueRule.setting == True):            
             for card in fstate.hand:
                 if card.value >= 11:
                     highCards += 1 
@@ -49,7 +49,7 @@ class LowCount(Feature):
     def f(self, fstate, action, combostate):
         #if greater is more powerful
         lowCards = 0
-        if (fstate.state.basicValueRule.setting == True):            
+        if (combostate.state.basicValueRule.setting == True):            
             for card in fstate.hand:
                 if card.value <= 5:
                     lowCards += 1 
@@ -156,8 +156,36 @@ class WildSuit(Feature):
         return trumpSuit
 
 
+class AceCount(Feature):
     
+    def f(self, fstate, action, combostate):
+        aces = 0
+        for card in fstate.hand:
+            if card.value == 14:
+                aces += 1 
+        return aces
 
+class TwoCount(Feature):
+    def f(self, fstate, action, combostate):
+        twos = 0
+        for card in fstate.hand:
+            if card.value == 2:
+                twos += 1 
+        return twos
+
+class PlayScrew(Feature):
+    def f(self, fstate, action, combostate):
+        return action.value == combostate.effectState.screwOpponentRule.setting
+        
+class PlaySkip(Feature):
+    def f(self, fstate, action, combostate):
+        return action.value == combostate.effectState.skipPlayerRule.setting
+
+class OpponentCards(Feature):
+    
+    def f(self, fstate, action, combostate):
+        #num cards in opponent's hand
+        return len(fstate.opponentHand)
 
 # \\\\\\\\\\\\\\\\
 # 
@@ -165,7 +193,7 @@ class WildSuit(Feature):
 # 
 # ////////////////
 
-# # Fake rules gethhelelp
+# Fake rules gethhelelp
 # bvRule = Rule('basicValueRule', 2)
 # wvRule = Rule('wildValueRule', 8)
 # wsRule = Rule('wildSuitRule', 'C')
@@ -189,9 +217,9 @@ class WildSuit(Feature):
 # card4 = Card(8, "H")
 # card3 = Card(14, "C")
 # 
-# testFstate = Fstate([card1, card3, card4], card2)
+# testFstate = Fstate([card1, card3], card2, [card4])
 # testAction = card2
 # 
-# print WildSuit(testFstate, testAction, combostate).f()
-
-# print featureDict([Illegality, LowCount], testFstate, testAction, combostate)
+# # print WildSuit(testFstate, testAction, combostate).f()
+# 
+# print featureDict([MajorityPercent(), PoisonCount()], testFstate, testAction, combostate)

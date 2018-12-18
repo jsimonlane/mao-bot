@@ -27,7 +27,7 @@ EffectState = namedtuple('EffectState', ['poisonCardRule', 'screwOpponentRule', 
 
 CombinedState = namedtuple('CombinedState', ['state', 'effectState'])
 
-Fstate = namedtuple('Fstate', ['hand', 'lastCard'])
+Fstate = namedtuple('Fstate', ['hand', 'lastCard', 'opponentHand'])
 
 #initialize a list of states
 stateList = []
@@ -45,6 +45,7 @@ Notification = namedtuple('Notification', ['type', 'attemptedCard', 'lastCard'])
 LEGAL = 1
 PENALTY = 2
 WON = 3
+NEWROUND = 100
 # NOTE: These are also used as effect-signalers in notifications
 # POISONCARD = 6
 # SCREWOPPONENT = 7

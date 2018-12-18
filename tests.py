@@ -38,20 +38,26 @@ def cliToPlayer(cli):
     agents = []
     for i, agent in enumerate(cli):
         # CHANGE WITH NEW AGENTS!
-        if cli == "human":
+        if agent == "human":
             namestr = "Human Player%s" % (i,)
             agents.append(HumanAgent(namestr))
-        elif cli == "hmm":
+        elif agent == "hmm":
             namestr = "Hmm AI Player%s" % (i,)
             agents.append(HmmAgent(namestr))
-        elif cli == "simple":
+        elif agent == "simple":
             namestr = "Simple AI Player%s" % (i,)
             agents.append(LearningAgent(namestr))
-        elif cli == "cardcounter":
-            namestr = "Simple AI Player%s" % (i,)
+        elif agent == "cardcounter":
+            namestr = "Expectimax Player%s" % (i,)
             agents.append(cardCounter(namestr))
-        elif cli == None:
+        elif agent == "qlearn":
+            namestr = "RL Player%s" % (i,)
+            agents.append(qLearner(namestr))
+        elif agent == None:
             continue
+        else:
+            print "Error: Incorrect Agent Specified!"
+    return agents
 
 
 # If the user has requested help or provided no arguments
@@ -60,27 +66,41 @@ if playStyle == "--help" or playStyle == "-h":
 elif playStyle == None:
     usage()
 else:
-
-    # now we know they've given an argument at least
-    p1 = HmmAgent("Learner")
-    p2 = HeuristicAgent("NaiveTests")
-
-    # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
-    g = Game([p1, p2], True)
-    g.playGame(100)
-
-    #print stats
-    for player in g.players:
-        # print "Card Tested: " + str(TESTCARD)
-        print player.name
-        print player.wins
-        if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent:
-            print np.average(player.validPercentByRound)
-
-
-
-# call with MonteCarlo
-# for x in range(0, 14):
-#     s = subprocess.check_output(["echo", "Hello World!"])
-#     print("s = " + s) 
-
+    cli = [agent1, agent2, agent3, agent4]
+    gameAgents = cliToPlayer(cli)
+    if playStyle == "playing":
+        try:
+            g = Game(gameAgents, True)
+            g.playGame(int(numGames))
+            for player in g.players:
+                print player.name
+                print player.wins
+                if type(player) == LearningAgent or type(player) == RandomAgent or type(player) == HmmAgent or type(player) == HeuristicAgent:
+                    print np.average(player.validPercentByRound)
+        except:
+            print "Something went wrong, be sure to check your agents and number of games "
+    elif playStyle == "montecarlo":
+        # @TD
+        print "Montecarlo requested"
+    elif playStyle == "all":
+        print "Human Agent Vs AI"
+        agent1 = HumanAgent("Human Player1")
+        agent2 = qLearner("Q-Learned Player")
+        g = Game([agent1, agent2], False)
+        g.playGame(int(numgames))
+        print "AI vs AI"
+        agent1 = qLearner("Q-Learned Player1")
+        agent2 = qLearner("Q-Learned Player2")
+        g = Game([agent1, agent2], True)
+        g.playGame(int(numGames))
+        for player in g.players:
+                print player.name
+                print player.wins
+        print "AI VS Adverserial"
+        agent1 = qLearner("Q-Learned Player1")
+        agent2 = cardCounter("Q-Learned Player2")
+        g = Game([agent1, agent2], True)
+        g.playGame(int(numGames))
+        for player in g.players:
+                print player.name
+                print player.wins
