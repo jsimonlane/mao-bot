@@ -8,6 +8,7 @@ import time
 import copy
 from agents import *    
 from qLearner import *
+from qOutput import *
 
 
 class Game(object):
@@ -346,6 +347,28 @@ def playTest():
 # # pBot2 = RandomAgent("A2")
 # # pBot = LearningAgent("Learner2")
 # pBot1 = HmmAgent("Learner")
+
+
+# <<<<<<< HEAD
+# # # tests
+pHuman = HmmAgent("J")
+# pBotw = RandomAgent("A1")
+# pBot2 = RandomAgent("A2")
+# pBot = LearningAgent("Learner2")
+pBot1 = CardCounter("Learner")
+
+g = Game([pHuman, pBot1], True)
+g.playGame(200)
+
+#print stats
+for player in g.players:
+    print player.name
+    print player.wins
+    if type(player) == CardCounter or type(player) == RandomAgent or type(player) == HmmAgent:
+        try:
+            print np.average(player.validPercentByRound)
+        except:
+            print 'div by zero'
 
 
 # player_names = ['J', 'lerner']

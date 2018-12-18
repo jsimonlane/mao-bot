@@ -183,6 +183,14 @@ class QPlayer(HmmAgent):
         initProb = 1 / float(len(stateList))
         for s in stateList:
             self.beliefDistrib[s] = initProb
+
+        self.numStates = []
+        self.notificationMatch = [0]
+        self.possibleStates = 0
+        for state in self.beliefDistrib:
+            if self.beliefDistrib[state] > 0:
+                self.possibleStates += 1
+        self.numStates.append(self.possibleStates)
             
   # return the card from your hand you want to play
     def chooseCard(self, lastCard, aggressive=False):
