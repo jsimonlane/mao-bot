@@ -131,7 +131,7 @@ def train7():
     f.write(pickled)
     f.close()
     
-train7()
+# train7()
 
 # see output.py for the pickled output
 
