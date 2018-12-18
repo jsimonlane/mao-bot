@@ -824,30 +824,30 @@ class CardCounter(HmmAgent):
                         self.beliefDistrib[state] = 0
             self.beliefDistrib.normalize()
             
+        if notification.type != NEWROUND:
+            if self.wonLast == 1:
+                self.discard = [notification.lastCard]
+                self.cardsAtLarge = []
+                self.opHandSize = 0
+                for player in game.players:
+                    if player != self:
+                        self.opHandSize += len(player.hand) 
+                self.cardBelief = {}
+                self.cardBelief[notification.lastCard] = 0
+                
+                for s in ["D", "H", "S", "C"]:
+                    for v in range(2,15):
+                        if Card(v,s) not in self.hand:
+                            self.cardsAtLarge.append(Card(v,s))
 
-        if self.wonLast == 1:
-            self.discard = [notification.lastCard]
-            self.cardsAtLarge = []
-            self.opHandSize = 0
-            for player in game.players:
-                if player != self:
-                    self.opHandSize += len(player.hand) 
-            self.cardBelief = {}
-            self.cardBelief[notification.lastCard] = 0
-            
-            for s in ["D", "H", "S", "C"]:
-                for v in range(2,15):
-                    if Card(v,s) not in self.hand:
-                        self.cardsAtLarge.append(Card(v,s))
+                self.cardsAtLarge.remove(notification.lastCard)
 
-            self.cardsAtLarge.remove(notification.lastCard)
-
-            for card in self.cardsAtLarge: 
-                self.cardBelief[card] = self.opHandSize/len(self.cardsAtLarge)
-            
-            for card in self.hand:
-                self.cardBelief[card] = 0
-            self.wonLast = 0
+                for card in self.cardsAtLarge: 
+                    self.cardBelief[card] = self.opHandSize/len(self.cardsAtLarge)
+                
+                for card in self.hand:
+                    self.cardBelief[card] = 0
+                self.wonLast = 0
 
         
         ####### WIN LOGIC ######

@@ -351,26 +351,26 @@ def playTest():
 
 
 
-# # # tests
-pHuman = HmmAgent("J")
-# pBotw = RandomAgent("A1")
-# pBot2 = RandomAgent("A2")
-# pBot = LearningAgent("Learner2")
-pBot1 = CardCounter("Learner")
+# # # # tests
+# pHuman = HmmAgent("J")
+# # pBotw = RandomAgent("A1")
+# # pBot2 = RandomAgent("A2")
+# # pBot = LearningAgent("Learner2")
+# pBot1 = CardCounter("Learner")
 
 
-g = Game([pHuman, pBot1], True)
-g.playGame(200)
+# g = Game([pHuman, pBot1], True)
+# g.playGame(200)
 
-#print stats
-for player in g.players:
-    print player.name
-    print player.wins
-    if type(player) == CardCounter or type(player) == RandomAgent or type(player) == HmmAgent:
-        try:
-            print np.average(player.validPercentByRound)
-        except:
-            print 'div by zero'
+# #print stats
+# for player in g.players:
+#     print player.name
+#     print player.wins
+#     if type(player) == CardCounter or type(player) == RandomAgent or type(player) == HmmAgent:
+#         try:
+#             print np.average(player.validPercentByRound)
+#         except:
+#             print 'div by zero'
 
 
 # player_names = ['J', 'lerner']
