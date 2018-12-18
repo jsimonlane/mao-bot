@@ -464,6 +464,7 @@ class HmmAgent(Agent):
             self.beliefDistrib.normalize()
             return
 
+
     def modifyRule(self, makeModification):
 
         ruletype = random.choice([BASICVALUE, WILDVALUE, WILDSUIT, POISONDIST, POISONCARD, SCREWOPPONENT, SKIPPLAYER])
@@ -566,24 +567,34 @@ class HeuristicAgent(HmmAgent):
             skipCard = 999
             screwCard = 999
             # if effects is malformed we can't easily pick a good card
+        cardvals = dict.fromkeys(legalCards, 0)
 
         for card in legalCards:
             if card.value == screwCard:
-                return card
+                cardvals[card] += 3
         
         for card in legalCards:
             if card.value == skipCard:
-                return card
+                cardvals[card] += 2
 
-        # Checks for smallest valued legal card
+        # Checks for smallest valued legal card & counts suits
         smallestCard = 15
         smallestIndex = 0
+        cardsuits = {'C':0,'D':0,'S':0,'H':0}
         for indx, card in enumerate(legalCards):
+            cardsuits[card.suit] += 1
             if card.value < smallestCard:
                 smallestCard = card.value
                 smallestIndex = indx
-
-        return legalCards[smallestIndex]
+        cardvals[legalCards[smallestIndex]] += 1
+    
+        # once this is done cardsuits has all suits
+        maxKey = max(cardsuits, key=cardsuits.get)
+        for card in legalCards:
+            if card.suit == maxKey:
+                cardvals[card] += 0
+        
+        return max(cardvals, key=cardvals.get)
 
   # return the card from your hand you want to play
     def chooseCard(self, lastCard):
@@ -753,7 +764,7 @@ class cardCounter(HmmAgent):
             self.beliefDistrib.normalize()
             
 
-        if self.wonLast == 1 and notification.type != NEWROUND:
+        if self.wonLast == 1:
             self.discard = [notification.lastCard]
             self.cardsAtLarge = []
             self.opHandSize = 0
@@ -901,3 +912,5 @@ class cardCounter(HmmAgent):
                             counterPlay += 1*self.cardBelief[counterCard]
                 counterPlays.append(counterPlay)
             return self.hand[np.argmin(counterPlays)]
+
+

@@ -340,15 +340,16 @@ def playTest():
 
         
     
-# tests
-# pHuman = RandomAgent("J")
+# # tests
+# pHuman = HmmAgent("J")
 # # pBotw = RandomAgent("A1")
 # # pBot2 = RandomAgent("A2")
 # # pBot = LearningAgent("Learner2")
-# pBot1 = HmmAgent("Learner")
+# pBot1 = HeuristicAgent("Learner")
 
-# g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
-
+# # g = Game([pHuman, pBot, pBotw, pBot1, pBot2], True)
+# g = Game([pHuman, pBot1], True)
+# g.playGame(500)
 
 # #print stats
 # for player in g.players:
